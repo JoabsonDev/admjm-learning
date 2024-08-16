@@ -67,7 +67,9 @@ export default function SignUp() {
         placeholder="Confirm Password"
       />
 
-      <Button className="w-full mt-4">Sign In</Button>
+      <Button className="w-full mt-4" color="danger">
+        Sign In
+      </Button>
 
       <span className="text-sm text-neutral-500 mt-4">
         By signing up, you agree to our{" "}

@@ -49,7 +49,9 @@ export default function SignIn() {
         accentColor="danger"
       />
 
-      <Button className="w-full mt-4">Sign In</Button>
+      <Button className="w-full mt-4" color="danger">
+        Sign In
+      </Button>
 
       <span className="text-sm text-neutral-500 mt-4">
         Or{" "}

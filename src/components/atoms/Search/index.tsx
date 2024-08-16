@@ -18,11 +18,9 @@ export default function Search({
   ...rest
 }: SearchProps) {
   className = variants({ className })
-  console.log(className)
 
   return (
     <div className={className}>
-      {" "}
       <input
         className="border-none outline-none bg-transparent w-full text-xs font-medium text-neutral-600 placeholder:focus-visible:text-neutral-500 peer transition duration-200"
         type={type}

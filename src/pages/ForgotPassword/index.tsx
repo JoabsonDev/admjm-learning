@@ -24,7 +24,9 @@ export default function ForgotPassword() {
         placeholder="Email Address"
       />
 
-      <Button className="w-full mt-4">Reset Password</Button>
+      <Button className="w-full mt-4" color="danger">
+        Reset Password
+      </Button>
 
       <span className="text-sm text-neutral-500">
         Go Back{" "}
