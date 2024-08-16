@@ -6,7 +6,7 @@ const variants = tv({
   base: "pt-24 pb-4 px-4 transition-all duration-300",
   variants: {
     hasAside: {
-      true: "ml-60"
+      true: "sm:ml-60"
     }
   }
 })
