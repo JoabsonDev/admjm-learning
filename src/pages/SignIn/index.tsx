@@ -1,9 +1,9 @@
-import Button from "../../components/atoms/Button"
-import FontAwesomeIcon from "../../components/atoms/FontAwesomeIcon"
-import Hr from "../../components/atoms/Hr"
-import Input from "../../components/atoms/Input"
-import NavLink from "../../components/atoms/NavLink"
-import Toggle from "../../components/atoms/Toggle"
+import Button from "@atoms/Button"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import Hr from "@atoms/Hr"
+import Input from "@atoms/Input"
+import NavLink from "@atoms/NavLink"
+import Toggle from "@atoms/Toggle"
 
 export default function SignIn() {
   return (

@@ -1,7 +1,7 @@
-import Button from "../../components/atoms/Button"
-import FontAwesomeIcon from "../../components/atoms/FontAwesomeIcon"
-import Input from "../../components/atoms/Input"
-import NavLink from "../../components/atoms/NavLink"
+import Button from "@atoms/Button"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import Input from "@atoms/Input"
+import NavLink from "@atoms/NavLink"
 
 export default function ForgotPassword() {
   return (

@@ -1,9 +1,9 @@
+import Auth from "@pages/Auth"
+import ForgotPassword from "@pages/ForgotPassword"
+import Home from "@pages/Home"
+import SignIn from "@pages/SignIn"
+import SignUp from "@pages/SignUp"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
-import Auth from "../pages/Auth"
-import ForgotPassword from "../pages/ForgotPassword"
-import Home from "../pages/Home"
-import SignIn from "../pages/SignIn"
-import SignUp from "../pages/SignUp"
 
 export default function Router() {
   return (
