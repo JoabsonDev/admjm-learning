@@ -11,6 +11,7 @@ export default function ForgotPassword() {
       </h1>
 
       <Input
+        className="w-full"
         type="email"
         config={{
           icon: (

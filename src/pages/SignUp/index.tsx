@@ -14,6 +14,7 @@ export default function SignUp() {
       <p className="text-sm text-gray-400 mb-8">Sign Up and Start Learning!</p>
 
       <Input
+        className="w-full"
         config={{
           icon: (
             <FontAwesomeIcon
@@ -26,6 +27,7 @@ export default function SignUp() {
       />
 
       <Input
+        className="w-full"
         config={{
           icon: (
             <FontAwesomeIcon
@@ -38,6 +40,7 @@ export default function SignUp() {
       />
 
       <Input
+        className="w-full"
         type="password"
         config={{
           icon: (
@@ -51,6 +54,7 @@ export default function SignUp() {
       />
 
       <Input
+        className="w-full"
         type="password"
         config={{
           icon: (

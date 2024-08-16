@@ -15,6 +15,7 @@ export default function SignIn() {
       </p>
 
       <Input
+        className="w-full"
         type="email"
         config={{
           icon: (
@@ -28,6 +29,7 @@ export default function SignIn() {
       />
 
       <Input
+        className="w-full"
         type="password"
         config={{
           icon: (
