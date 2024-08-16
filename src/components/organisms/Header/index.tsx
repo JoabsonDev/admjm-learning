@@ -4,7 +4,8 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import NavLink from "@atoms/NavLink"
 import Search from "@atoms/Search"
-import { ComponentProps } from "react"
+import { ToggleAsideContext } from "@contexts/ToggleAsideProvider/ToggleAside.context"
+import { ComponentProps, useContext } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
@@ -13,6 +14,7 @@ const variants = tv({
 type HeaderProps = ComponentProps<"header"> & VariantProps<typeof variants> & {}
 
 export default function Header({ className, ...rest }: HeaderProps) {
+  const { setIsVisible } = useContext(ToggleAsideContext)
   className = variants({ className })
 
   return (
@@ -35,7 +37,10 @@ export default function Header({ className, ...rest }: HeaderProps) {
       <nav className="ml-auto">
         <ul className="flex items-center gap-4">
           <li className="sm:hidden">
-            <Button className="px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800  hover:bg-gray-100 focus:bg-gray-100">
+            <Button
+              className="px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800  hover:bg-gray-100 focus:bg-gray-100"
+              onClick={setIsVisible}
+            >
               <FontAwesomeIcon icon="fa-solid fa-bars" />
             </Button>
           </li>
