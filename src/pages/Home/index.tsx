@@ -1,4 +1,5 @@
 import Avatar from "@atoms/Avatar"
+import Badge from "@atoms/Badge"
 import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import NavLink from "@atoms/NavLink"
@@ -30,13 +31,15 @@ export default function Home() {
               </Button>
             </li>
             <li>
-              <Button className="px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
+              <Button className="relative px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
                 <FontAwesomeIcon icon="fa-solid fa-cart-shopping" />
+                <Badge className="absolute right-0 -top-[3px]">1</Badge>
               </Button>
             </li>
             <li>
-              <Button className="px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
+              <Button className="relative px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
                 <FontAwesomeIcon icon="fa-solid fa-bell" />
+                <Badge className="absolute right-0 -top-[3px]">3</Badge>
               </Button>
             </li>
             <li>
