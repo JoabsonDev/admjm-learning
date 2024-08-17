@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <Sidebar>aside</Sidebar>
+      <Sidebar />
       <Main />
       <footer>footer</footer>
     </>
