@@ -11,13 +11,13 @@ const variants = tv({
   //   }
   // }
 })
-type StarsProps = ComponentProps<"div"> &
+type RateProps = ComponentProps<"div"> &
   VariantProps<typeof variants> & {
     size: RatingSize
   }
 
 // TODO: criar funcionalidade para dar nota com as estrelas
-export default function Stars({ className, size, ...rest }: StarsProps) {
+export default function Rate({ className, size, ...rest }: RateProps) {
   className = variants({ className })
 
   const length = Math.ceil(size)

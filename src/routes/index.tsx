@@ -19,10 +19,13 @@ export default function Router() {
         </Route>
         <Route path="/" element={<Dashboard />}>
           <Route path="/" element={<Home />} />
-          <Route path="/course/details" element={<CourseDetails />} />
+
+          <Route path="/course/:courseId/details" element={<CourseDetails />} />
         </Route>
         <Route path="/course" element={<Course />}>
-          <Route path=":id" element={<div>Course</div>} />
+          <Route path=":courseId" element={<Course />}>
+            <Route path="lecture/:lectureId" element={<Course />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

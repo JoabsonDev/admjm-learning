@@ -1,32 +1,58 @@
 import Button from "@atoms/Button"
-import Stars from "@atoms/Stars"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import Rate from "@atoms/Rate"
 import CourseContentAccordion from "@organisms/CourseContentAccordion"
+import { useCourse } from "@store/course"
+import { useEffect } from "react"
+import { useQuery } from "react-query"
+import { useParams } from "react-router-dom"
 
 export default function CourseDetails() {
+  const { courseId } = useParams()
+
+  const { fetchCourse, course } = useCourse(({ fetchCourse, course }) => ({
+    fetchCourse,
+    course
+  }))
+  const { isLoading } = useQuery(
+    ["course", courseId],
+    () => fetchCourse(courseId!),
+    { refetchOnWindowFocus: false }
+  )
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
   return (
-    <div>
-      <div className="bg-neutral-800 text-white p-4 flex gap-4 h-[232px]">
-        <div className="p-2.5 bg-white rounded-lg flex items-center justify-center max-w-[340px]">
-          <img
-            className="rounded-[4px]"
-            src="https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-2.jpg"
-            alt=""
-          />
+    <div className="mb-10">
+      <div className="bg-neutral-800 text-white p-4 flex flex-col md:flex-row gap-4 h-auto xl:h-[232px]">
+        <div className="p-2.5 bg-white rounded-lg flex items-center justify-center w-full min-w-52 md:max-w-[340px] flex-1">
+          {course?.thumbnail ? (
+            <img
+              className="rounded-[4px]"
+              src={course?.thumbnail}
+              alt={`Imagem do curso ${course?.title || ""}`}
+            />
+          ) : (
+            <FontAwesomeIcon
+              icon="fa-solid fa-image"
+              className="text-neutral-400"
+            />
+          )}
         </div>
 
         <div className="h-full flex flex-col">
-          <h1 className="font-semibold text-2xl mb-4">
-            The Web Developer Bootcamp
-          </h1>
+          <h1 className="font-semibold text-2xl mb-4">{course?.title}</h1>
 
-          <p className="text-sm mb-5 line-clamp-3">
-            The only course you need to learn web development - HTML, CSS, JS,
-            Node, and More!
-          </p>
+          <p className="text-sm mb-5 line-clamp-3">{course?.description}</p>
 
-          <Stars size={4.5} className="text-yellow-500" />
+          <Rate
+            size={(course?.rate || 0) as RatingSize}
+            className="text-yellow-500"
+          />
 
-          <div className="mt-auto flex items-center gap-4">
+          <div className="mt-4 xl:mt-auto flex items-center gap-4">
             <Button
               color="danger"
               className="border border-transparent hover:bg-red-600"
@@ -44,8 +70,7 @@ export default function CourseDetails() {
         <h2 className="mb-5 text-lg font-medium text-neutral-700">
           Conteúdo do curso
         </h2>
-
-        <CourseContentAccordion />
+        {!isLoading && <CourseContentAccordion />}
       </div>
     </div>
   )

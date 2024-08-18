@@ -5,9 +5,9 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Hr from "@atoms/Hr"
 import NavLink from "@atoms/NavLink"
 import Search from "@atoms/Search"
-import { ToggleAsideContext } from "@contexts/ToggleAsideProvider/ToggleAside.context"
 import { isSafeArea } from "@helpers/is-safe-area"
-import { ComponentProps, useContext, useEffect, useRef, useState } from "react"
+import { useSidebarStore } from "@store/sidebar"
+import { ComponentProps, useEffect, useRef, useState } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
@@ -16,7 +16,9 @@ const variants = tv({
 type HeaderProps = ComponentProps<"header"> & VariantProps<typeof variants> & {}
 
 export default function Header({ className, ...rest }: HeaderProps) {
-  const { setIsVisible } = useContext(ToggleAsideContext)
+  const { setIsVisible } = useSidebarStore(({ setIsVisible }) => ({
+    setIsVisible
+  }))
   className = variants({ className })
 
   const [showSubMenu, setShowSubMenu] = useState<boolean>(false)

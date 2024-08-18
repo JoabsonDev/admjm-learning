@@ -2,7 +2,7 @@ import { ComponentProps, forwardRef } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "text-sm py-2 px-4 rounded transition duration-200",
+  base: "text-sm py-2 px-4 rounded transition duration-200 disabled:bg-neutral-300 disabled:text-white disabled:cursor-not-allowed",
   variants: {
     color: {
       default: "bg-transparent",

@@ -36,6 +36,10 @@ export default defineConfig({
         replacement: path.resolve(__dirname, "./src/contexts")
       },
       {
+        find: "@store",
+        replacement: path.resolve(__dirname, "./src/store")
+      },
+      {
         find: "@enums",
         replacement: path.resolve(__dirname, "./src/enums")
       },
