@@ -5,6 +5,7 @@ const variants = tv({
   base: "hover:underline transition duration-200",
   variants: {
     color: {
+      default: "text-neutral-700 hover:text-neutral-900",
       // primary: "text-blue-500 text-white hover:text-blue-600",
       // secondary: "text-green-500 text-white hover:text-green-600",
       // info: "text-teal-500 text-white hover:text-teal-600",
@@ -17,7 +18,7 @@ type LinkProps = NavLinkProps & VariantProps<typeof variants> & {}
 
 export default function NavLink({
   className = "",
-  color = "danger",
+  color = "default",
   ...rest
 }: LinkProps) {
   className = variants({ color, className: className as string })
