@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "pt-24 pb-4 px-4 transition-all duration-300",
+  base: "pt-16 pb-4 transition-all duration-300",
   variants: {
     hasAside: {
       true: "sm:ml-60"
