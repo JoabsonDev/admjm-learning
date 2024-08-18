@@ -7,4 +7,5 @@ type CourseCard = {
   rating?: RatingSize
   time?: string
   url: string
+  alreadyPurchased?: boolean
 }
