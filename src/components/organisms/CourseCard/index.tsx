@@ -7,7 +7,7 @@ import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "p-2.5 bg-white rounded-sm border border-neutral-200 max-w-sm"
+  base: "p-2.5 bg-white rounded-sm border border-neutral-200 max-w-sm min-h-[400px] flex flex-col"
 })
 type CourseCardProps = ComponentProps<"div"> &
   VariantProps<typeof variants> & {
@@ -20,11 +20,11 @@ export default function CourseCard({
   ...rest
 }: CourseCardProps) {
   className = variants({ className })
-  const { title, image, rating = 0, time, price, url } = data
+  const { title, description, image, rating = 0, time, price, url } = data
 
   return (
     <div className={className} {...rest}>
-      <NavLink to={url} className="relative">
+      <NavLink to={url} className="relative" aria-label={title}>
         <img className="w-full" src={image} alt={`Imagem do curso ${title}`} />
 
         <div className="group absolute inset-0 bg-gradient-to-b from-transparent to-neutral-700/35">
@@ -40,12 +40,12 @@ export default function CourseCard({
         </div>
       </NavLink>
 
-      <div className="px-1 py-2.5">
+      <div className="px-1 py-2.5 flex flex-col flex-1">
         <div className="flex items-center justify-between">
           <Stars size={rating} />
 
           <div className="relative group">
-            <Button className="p-1">
+            <Button className="p-1" aria-label="Mais opções">
               <FontAwesomeIcon
                 icon="fa-solid fa-ellipsis-vertical"
                 className="text-lg text-neutral-500"
@@ -79,28 +79,30 @@ export default function CourseCard({
           to={"/"}
           className="text-base font-semibold block mb-2 hover:no-underline"
         >
-          Complete Python Bootcamp: Go from zero to hero in Python 3
+          {title}
         </NavLink>
 
-        <p className="text-xs text-neutral-500 line-clamp-3">
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam
-          suscipit molestias, deserunt magni laudantium, corporis veniam rem ab
-          cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt nam
-          asperiores dolores magnam!
-        </p>
+        {description && (
+          <p className="text-xs text-neutral-500 line-clamp-3">{description}</p>
+        )}
 
         {price && (
-          <div className="flex items-center justify-end mt-2 min-h-11">
-            <Button className="p-2 text-neutral-700 w-10 group">
+          <div className="flex items-center justify-end mt-auto">
+            <Button
+              className="p-2 text-neutral-700 w-10 group"
+              aria-label="Adicionar ao carrinho"
+            >
               <FontAwesomeIcon
                 icon="fa-solid fa-cart-shopping"
                 className="text-base group-hover:text-lg transition-all duration-200"
               />
             </Button>
 
-            <span className="text-neutral-700 text-base font-medium">
-              {formateCurrency({ value: price })}
-            </span>
+            {price && (
+              <span className="text-neutral-700 text-base font-medium">
+                {formateCurrency({ value: price })}
+              </span>
+            )}
           </div>
         )}
       </div>

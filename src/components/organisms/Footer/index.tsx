@@ -52,8 +52,8 @@ export default function Footer({ className, ...rest }: FooterProps) {
   return (
     <footer className={className} {...rest}>
       <div className="mx-auto max-w-screen-xl w-full flex-1 flex flex-col">
-        <div className="flex items-center justify-between">
-          <span className="text-sm flex items-center py-5">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <span className="text-sm flex items-center py-5 justify-center md:justify-start w-full flex-1 basis-72 text-nowrap md:grow-0">
             <img
               className="mr-4 w-8"
               src="https://gambolthemes.net/html-items/cursus-new-demo/images/logo1.svg"
@@ -63,7 +63,7 @@ export default function Footer({ className, ...rest }: FooterProps) {
             Reserved.
           </span>
 
-          <ul className="flex gap-2">
+          <ul className="flex gap-2 justify-center md:justify-start w-full flex-1 md:grow-0">
             {socialMedias.map((socialMedia) => (
               <li key={socialMedia.icon}>
                 <a href={socialMedia.link}>

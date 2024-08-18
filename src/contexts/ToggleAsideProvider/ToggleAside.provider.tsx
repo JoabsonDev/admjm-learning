@@ -3,7 +3,7 @@ import { BREAKPOINTS } from "../../emuns/breakpoints.enum"
 import { ToggleAsideContext } from "./ToggleAside.context"
 
 export function ToggleAsideProvider({ children }: { children: ReactNode }) {
-  const [visible, setVisible] = useState<boolean>(true)
+  const [visible, setVisible] = useState<boolean>(false)
 
   function setIsVisible() {
     setVisible((prev) => !prev)
@@ -14,6 +14,8 @@ export function ToggleAsideProvider({ children }: { children: ReactNode }) {
       if (window.innerWidth >= BREAKPOINTS.SM && !visible) setVisible(true)
       else if (window.innerWidth < BREAKPOINTS.SM && visible) setVisible(false)
     }
+
+    checkBreakpoint()
 
     window.addEventListener("resize", checkBreakpoint)
 
