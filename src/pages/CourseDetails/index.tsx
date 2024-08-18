@@ -1,10 +1,11 @@
 import Button from "@atoms/Button"
 import Stars from "@atoms/Stars"
+import CourseContentAccordion from "@organisms/CourseContentAccordion"
 
 export default function CourseDetails() {
   return (
     <div>
-      <div className="bg-neutral-800 text-white p-8 flex gap-4 h-[264px]">
+      <div className="bg-neutral-800 text-white p-4 flex gap-4 h-[232px]">
         <div className="p-2.5 bg-white rounded-lg flex items-center justify-center max-w-[340px]">
           <img
             className="rounded-[4px]"
@@ -37,6 +38,14 @@ export default function CourseDetails() {
             </Button>
           </div>
         </div>
+      </div>
+
+      <div className="px-4 mt-6">
+        <h2 className="mb-5 text-lg font-medium text-neutral-700">
+          Conteúdo do curso
+        </h2>
+
+        <CourseContentAccordion />
       </div>
     </div>
   )
