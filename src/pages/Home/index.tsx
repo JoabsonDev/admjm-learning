@@ -65,7 +65,7 @@ export default function Home() {
     }
   ]
   return (
-    <div>
+    <div className="pt-8 px-4">
       <div className="mb-12">
         <h2 className="mb-5 text-lg font-medium text-neutral-700">
           Continuar estudando
