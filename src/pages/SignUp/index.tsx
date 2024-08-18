@@ -1,8 +1,8 @@
-import Button from "../../components/atoms/Button"
-import FontAwesomeIcon from "../../components/atoms/FontAwesomeIcon"
-import Hr from "../../components/atoms/Hr"
-import Input from "../../components/atoms/Input"
-import NavLink from "../../components/atoms/NavLink"
+import Button from "@atoms/Button"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import Hr from "@atoms/Hr"
+import Input from "@atoms/Input"
+import NavLink from "@atoms/NavLink"
 
 export default function SignUp() {
   return (
@@ -14,6 +14,7 @@ export default function SignUp() {
       <p className="text-sm text-gray-400 mb-8">Sign Up and Start Learning!</p>
 
       <Input
+        className="w-full"
         config={{
           icon: (
             <FontAwesomeIcon
@@ -26,6 +27,7 @@ export default function SignUp() {
       />
 
       <Input
+        className="w-full"
         config={{
           icon: (
             <FontAwesomeIcon
@@ -38,6 +40,7 @@ export default function SignUp() {
       />
 
       <Input
+        className="w-full"
         type="password"
         config={{
           icon: (
@@ -51,6 +54,7 @@ export default function SignUp() {
       />
 
       <Input
+        className="w-full"
         type="password"
         config={{
           icon: (
@@ -63,7 +67,9 @@ export default function SignUp() {
         placeholder="Confirm Password"
       />
 
-      <Button className="w-full mt-4">Sign In</Button>
+      <Button className="w-full mt-4" color="danger">
+        Sign In
+      </Button>
 
       <span className="text-sm text-neutral-500 mt-4">
         By signing up, you agree to our{" "}

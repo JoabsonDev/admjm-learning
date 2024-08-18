@@ -8,5 +8,9 @@ export default {
       }
     }
   },
-  plugins: []
+  plugins: [
+    function ({ addVariant }) {
+      addVariant("active", "&.active")
+    }
+  ]
 }

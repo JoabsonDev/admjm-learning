@@ -1,7 +1,7 @@
-import Button from "../../components/atoms/Button"
-import FontAwesomeIcon from "../../components/atoms/FontAwesomeIcon"
-import Input from "../../components/atoms/Input"
-import NavLink from "../../components/atoms/NavLink"
+import Button from "@atoms/Button"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import Input from "@atoms/Input"
+import NavLink from "@atoms/NavLink"
 
 export default function ForgotPassword() {
   return (
@@ -11,6 +11,7 @@ export default function ForgotPassword() {
       </h1>
 
       <Input
+        className="w-full"
         type="email"
         config={{
           icon: (
@@ -23,7 +24,9 @@ export default function ForgotPassword() {
         placeholder="Email Address"
       />
 
-      <Button className="w-full mt-4">Reset Password</Button>
+      <Button className="w-full mt-4" color="danger">
+        Reset Password
+      </Button>
 
       <span className="text-sm text-neutral-500">
         Go Back{" "}

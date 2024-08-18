@@ -2,7 +2,7 @@ import React, { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "border border-neutral-300 has-[:focus-visible]:border-neutral-500 rounded overflow-hidden px-4 py-1 flex items-center gap-1 w-full transition duration-200"
+  base: "border border-neutral-300 has-[:focus-visible]:border-neutral-500 rounded overflow-hidden px-4 py-1 flex items-center gap-1 transition duration-200"
 })
 type InputConfig = {
   icon?: React.ReactNode
@@ -23,7 +23,6 @@ type InputTypes =
   | "password"
   | "range"
   | "reset"
-  | "search"
   | "submit"
   | "tel"
   | "text"

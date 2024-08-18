@@ -1,9 +1,9 @@
-import Button from "../../components/atoms/Button"
-import FontAwesomeIcon from "../../components/atoms/FontAwesomeIcon"
-import Hr from "../../components/atoms/Hr"
-import Input from "../../components/atoms/Input"
-import NavLink from "../../components/atoms/NavLink"
-import Toggle from "../../components/atoms/Toggle"
+import Button from "@atoms/Button"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import Hr from "@atoms/Hr"
+import Input from "@atoms/Input"
+import NavLink from "@atoms/NavLink"
+import Toggle from "@atoms/Toggle"
 
 export default function SignIn() {
   return (
@@ -15,6 +15,7 @@ export default function SignIn() {
       </p>
 
       <Input
+        className="w-full"
         type="email"
         config={{
           icon: (
@@ -28,6 +29,7 @@ export default function SignIn() {
       />
 
       <Input
+        className="w-full"
         type="password"
         config={{
           icon: (
@@ -47,7 +49,9 @@ export default function SignIn() {
         accentColor="danger"
       />
 
-      <Button className="w-full mt-4">Sign In</Button>
+      <Button className="w-full mt-4" color="danger">
+        Sign In
+      </Button>
 
       <span className="text-sm text-neutral-500 mt-4">
         Or{" "}

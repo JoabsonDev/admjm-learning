@@ -19,6 +19,21 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@assets/*": ["./src/assets/*"],
+      "@atoms/*": ["./src/components/atoms/*"],
+      "@molecules/*": ["./src/components/molecules/*"],
+      "@organisms/*": ["./src/components/organisms/*"],
+      "@templates/*": ["./src/components/templates/*"],
+      "@constants/*": ["./src/constants/*"],
+      "@contexts/*": ["./src/contexts/*"],
+      "@enums/*": ["./src/enums/*"],
+      "@helpers/*": ["./src/helpers/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@services/*": ["./src/services/*"],
+      "@styles/*": ["./src/styles/*"]
+    },
     "typeRoots": ["node_modules/@types", "src/types"]
   },
   "include": ["src"]
