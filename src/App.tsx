@@ -1,10 +1,12 @@
-import { ToggleAsideProvider } from "@contexts/ToggleAsideProvider/ToggleAside.provider"
+import { QueryClient, QueryClientProvider } from "react-query"
 import Router from "./routes"
+
+const queryClient = new QueryClient()
 
 export default function App() {
   return (
-    <ToggleAsideProvider>
+    <QueryClientProvider client={queryClient}>
       <Router />
-    </ToggleAsideProvider>
+    </QueryClientProvider>
   )
 }

@@ -1,22 +1,12 @@
-import { ToggleAsideContext } from "@contexts/ToggleAsideProvider/ToggleAside.context"
-import { ComponentProps, useContext } from "react"
+import { ComponentProps } from "react"
 import { Outlet } from "react-router-dom"
 import { tv, VariantProps } from "tailwind-variants"
 
-const variants = tv({
-  base: "pt-16 pb-4 transition-all duration-300",
-  variants: {
-    hasAside: {
-      true: "sm:ml-60"
-    }
-  }
-})
+const variants = tv({})
 type MainProps = ComponentProps<"main"> & VariantProps<typeof variants> & {}
 
 export default function Main({ className, ...rest }: MainProps) {
-  const { isVisible } = useContext(ToggleAsideContext)
-  className = variants({ hasAside: isVisible, className })
-
+  className = variants({ className })
   return (
     <main className={className} {...rest}>
       <Outlet />

@@ -2,8 +2,8 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Hr from "@atoms/Hr"
 import NavLink from "@atoms/NavLink"
-import { ToggleAsideContext } from "@contexts/ToggleAsideProvider/ToggleAside.context"
-import { ComponentProps, useContext } from "react"
+import { useSidebarStore } from "@store/sidebar"
+import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
@@ -18,7 +18,7 @@ const variants = tv({
 type SidebarProps = ComponentProps<"aside"> & VariantProps<typeof variants> & {}
 
 export default function Sidebar({ className, ...rest }: SidebarProps) {
-  const { isVisible } = useContext(ToggleAsideContext)
+  const { isVisible } = useSidebarStore(({ isVisible }) => ({ isVisible }))
   className = variants({ isVisible, className })
 
   const menuItems: SidebarItem[] = [

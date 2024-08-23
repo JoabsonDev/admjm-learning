@@ -1,4 +1,9 @@
+import { createQueryParams } from "@helpers/create-query-params"
+import { useDebounce } from "@hooks/debounce"
+import Pagination from "@molecules/Pagination"
 import CourseCard from "@organisms/CourseCard"
+import Sort from "@organisms/Sort"
+import { useEffect, useRef, useState } from "react"
 
 export default function Home() {
   const continueCourses: CourseCard = {
@@ -10,8 +15,7 @@ export default function Home() {
     image:
       "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
     rating: 4.5,
-    time: "25 hours",
-    url: "/course/1"
+    time: "25 hours"
   }
 
   const featuredCourses: CourseCard[] = [
@@ -25,7 +29,7 @@ export default function Home() {
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
       rating: 4.5,
       time: "25 hours",
-      url: "/course/1"
+      alreadyPurchased: true
     },
     {
       id: "2",
@@ -37,7 +41,7 @@ export default function Home() {
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-2.jpg",
       rating: 3.5,
       time: "28 hours",
-      url: "/course/2"
+      alreadyPurchased: true
     },
     {
       id: "3",
@@ -49,7 +53,7 @@ export default function Home() {
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-3.jpg",
       rating: 4,
       time: "12 hours",
-      url: "/course/3"
+      alreadyPurchased: true
     },
     {
       id: "4",
@@ -61,9 +65,46 @@ export default function Home() {
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-4.jpg",
       rating: 2.5,
       time: "1 hour",
-      url: "/course/4"
+      alreadyPurchased: true
     }
   ]
+
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    pageSize: 15,
+    total: 89
+  })
+
+  const [sort, setSort] = useState<SortConfig>({
+    order: null,
+    value: ""
+  })
+
+  const isMounted = useRef(false)
+
+  const debouncedQuery = useDebounce(sort.value, 300)
+
+  useEffect(() => {
+    if (!isMounted.current) {
+      isMounted.current = true
+      return
+    }
+
+    handleFilter()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, sort.order])
+
+  function handleFilter() {
+    const params = {
+      ...sort,
+      value: debouncedQuery,
+      currentPage: pagination.currentPage,
+      pageSize: pagination.pageSize
+    }
+
+    console.log(`Buscando por:`, createQueryParams(params))
+  }
+
   return (
     <div className="pt-8 px-4">
       <div className="mb-12">
@@ -78,19 +119,31 @@ export default function Home() {
       </div>
 
       <div className="mb-12">
-        <h2 className="mb-5 text-lg font-medium text-neutral-700">
-          Cursos em destaque
-        </h2>
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
+          <h2 className="text-lg font-medium text-neutral-700">
+            Cursos em destaque
+          </h2>
 
-        <div className="flex gap-4 flex-wrap">
+          <Sort config={sort} onSort={setSort} className="flex-1" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {featuredCourses.map((course) => (
             <CourseCard
-              className="flex-1 basis-72 mx-auto md:m-0 max-w-full md:max-w-xs"
+              className="w-full max-w-full"
               key={course.id}
               data={course}
             />
           ))}
         </div>
+
+        <Pagination
+          className="mt-10"
+          data={pagination}
+          onPageChange={(page) =>
+            setPagination({ ...pagination, currentPage: page })
+          }
+        />
       </div>
     </div>
   )

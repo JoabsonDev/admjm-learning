@@ -1,21 +1,14 @@
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
-import { ToggleAsideContext } from "@contexts/ToggleAsideProvider/ToggleAside.context"
-import { ComponentProps, useContext } from "react"
+import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "px-4 bg-neutral-800 text-white mt-auto flex",
-  variants: {
-    hasAside: {
-      true: "sm:ml-60"
-    }
-  }
+  base: "px-4 bg-neutral-800 text-white flex"
 })
 type FooterProps = ComponentProps<"footer"> & VariantProps<typeof variants> & {}
 
 export default function Footer({ className, ...rest }: FooterProps) {
-  const { isVisible } = useContext(ToggleAsideContext)
-  className = variants({ hasAside: isVisible, className })
+  className = variants({ className })
 
   // TODO: mover para um arquivo de constantes, criar type e talvez usar um dotenv
   const socialMedias = [

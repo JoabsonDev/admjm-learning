@@ -1,7 +1,7 @@
 import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import NavLink from "@atoms/NavLink"
-import Stars from "@atoms/Stars"
+import Rate from "@atoms/Rate"
 import { formateCurrency } from "@helpers/formate-currency"
 import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
@@ -20,11 +20,24 @@ export default function CourseCard({
   ...rest
 }: CourseCardProps) {
   className = variants({ className })
-  const { title, description, image, rating = 0, time, price, url } = data
+  const {
+    id,
+    title,
+    description,
+    image,
+    rating = 0,
+    time,
+    price,
+    alreadyPurchased
+  } = data
 
   return (
     <div className={className} {...rest}>
-      <NavLink to={url} className="relative" aria-label={title}>
+      <NavLink
+        to={alreadyPurchased ? `/course/${id}/details` : `/course/${id}`}
+        className="relative"
+        aria-label={title}
+      >
         <img className="w-full" src={image} alt={`Imagem do curso ${title}`} />
 
         <div className="group absolute inset-0 bg-gradient-to-b from-transparent to-neutral-700/35">
@@ -42,7 +55,7 @@ export default function CourseCard({
 
       <div className="px-1 py-2.5 flex flex-col flex-1">
         <div className="flex items-center justify-between">
-          <Stars size={rating} />
+          <Rate size={rating} />
 
           <div className="relative group">
             <Button className="p-1" aria-label="Mais opções">
@@ -88,15 +101,17 @@ export default function CourseCard({
 
         {price && (
           <div className="flex items-center justify-end mt-auto">
-            <Button
-              className="p-2 text-neutral-700 w-10 group"
-              aria-label="Adicionar ao carrinho"
-            >
-              <FontAwesomeIcon
-                icon="fa-solid fa-cart-shopping"
-                className="text-base group-hover:text-lg transition-all duration-200"
-              />
-            </Button>
+            {!alreadyPurchased && (
+              <Button
+                className="p-2 text-neutral-700 w-10 group"
+                aria-label="Adicionar ao carrinho"
+              >
+                <FontAwesomeIcon
+                  icon="fa-solid fa-cart-shopping"
+                  className="text-base group-hover:text-lg transition-all duration-200"
+                />
+              </Button>
+            )}
 
             {price && (
               <span className="text-neutral-700 text-base font-medium">
