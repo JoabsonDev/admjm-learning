@@ -9,7 +9,8 @@ export default {
       animation: {
         pulse: "pulse 1s ease-in-out infinite",
         "pulse-bullet-red": "pulse-bullet-animation-red 1.5s infinite",
-        "pulse-bullet-green": "pulse-bullet-animation-green 1.5s infinite"
+        "pulse-bullet-green": "pulse-bullet-animation-green 1.5s infinite",
+        shimmer: "shimmer 1.5s infinite linear"
       },
       keyframes: {
         pulse: {
@@ -32,6 +33,10 @@ export default {
           "100%": {
             boxShadow: "0 0 0 1.25rem rgba(252, 165, 165, 0)"
           }
+        },
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" }
         }
       }
     }

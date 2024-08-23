@@ -179,7 +179,7 @@ export default function Player({ className, ...rest }: PlayerProps) {
                             {details.guidelines.title}
                           </h3>
                           {details.guidelines.items.map((item) => (
-                            <li key={item} className="ml-10">
+                            <li key={item} className="ml-10 text-sm">
                               {item}
                             </li>
                           ))}
@@ -191,7 +191,7 @@ export default function Player({ className, ...rest }: PlayerProps) {
                             {details.rules.title}
                           </h3>
                           {details.rules.items.map((item) => (
-                            <li key={item} className="ml-10">
+                            <li key={item} className="ml-10 text-sm">
                               {item}
                             </li>
                           ))}
