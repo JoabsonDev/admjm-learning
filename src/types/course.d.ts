@@ -16,6 +16,5 @@ type Course = {
   price?: number
   duration?: string
   rate: RatingSize
-  alreadyPurchased?: boolean
   lessons?: Lesson[]
 }

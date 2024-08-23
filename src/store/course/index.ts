@@ -1,5 +1,6 @@
 import { calculateTotalDuration } from "@helpers/calculate-total-duration"
-import { api } from "@services/axios"
+import { db } from "@services/firebase-config"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { create } from "zustand"
 
 const INITIAL_LECTURE_STATE = {
@@ -22,6 +23,22 @@ export type CourseStore = {
   activeLesson: number | null
   setActiveLesson: (course: Course, lectureId: string) => void
   done: boolean
+}
+
+async function getCourse(courseId: string): Promise<Course> {
+  const courseRef = doc(db, "course", courseId)
+  const courseSnapshot = await getDoc(courseRef)
+  const courseData = courseSnapshot.data() as Course
+
+  if (courseSnapshot.exists()) {
+    const lessonsRef = collection(courseRef, "lessons")
+    const lessonsSnapshot = await getDocs(lessonsRef)
+    const lessons = lessonsSnapshot.docs.map((doc) => doc.data() as Lesson)
+
+    courseData.lessons = lessons
+  }
+
+  return courseData
 }
 
 export const useCourse = create<CourseStore>((set) => {
@@ -103,8 +120,8 @@ export const useCourse = create<CourseStore>((set) => {
     course: null,
     fetchCourse: async (id: string) => {
       try {
-        const { data } = await api.get<Course>(`/course/${id}`)
-        const course = data
+        const course = await getCourse(id)
+
         set(() => {
           return {
             course: handleSetTime(course),

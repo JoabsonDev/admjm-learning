@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react"
 
 export default function Home() {
   const continueCourses: Course = {
-    id: "1",
+    id: "bTuVJqVVfoprKX7Tj221",
     title: "Complete Python Bootcamp: Go from zero to hero in Python 3",
     description:
       "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
@@ -20,7 +20,7 @@ export default function Home() {
 
   const featuredCourses: Course[] = [
     {
-      id: "1",
+      id: "bTuVJqVVfoprKX7Tj221",
       title: "Complete Python Bootcamp: Go from zero to hero in Python 3",
       description:
         "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
