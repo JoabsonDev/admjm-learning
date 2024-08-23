@@ -43,6 +43,10 @@ export default {
       const newUtilities = {
         ".outline-ring": {
           outline: "-webkit-focus-ring-color auto .0625rem"
+        },
+
+        ".backdrop-filter-blur::backdrop": {
+          "backdrop-filter": "blur(2px)"
         }
       }
 
