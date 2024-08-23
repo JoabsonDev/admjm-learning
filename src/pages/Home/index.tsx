@@ -6,29 +6,29 @@ import Sort from "@organisms/Sort"
 import { useEffect, useRef, useState } from "react"
 
 export default function Home() {
-  const continueCourses: CourseCard = {
+  const continueCourses: Course = {
     id: "1",
     title: "Complete Python Bootcamp: Go from zero to hero in Python 3",
     description:
       "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
     // price: 25,
-    image:
+    thumbnail:
       "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
-    rating: 4.5,
-    time: "25 hours"
+    rate: 4.5,
+    duration: "25 hours"
   }
 
-  const featuredCourses: CourseCard[] = [
+  const featuredCourses: Course[] = [
     {
       id: "1",
       title: "Complete Python Bootcamp: Go from zero to hero in Python 3",
       description:
         "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
       price: 25,
-      image:
+      thumbnail:
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
-      rating: 4.5,
-      time: "25 hours",
+      rate: 4.5,
+      duration: "25 hours",
       alreadyPurchased: true
     },
     {
@@ -37,10 +37,10 @@ export default function Home() {
       description:
         "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
       price: 20,
-      image:
+      thumbnail:
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-2.jpg",
-      rating: 3.5,
-      time: "28 hours",
+      rate: 3.5,
+      duration: "28 hours",
       alreadyPurchased: true
     },
     {
@@ -49,10 +49,10 @@ export default function Home() {
       description:
         "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
       price: 24.5,
-      image:
+      thumbnail:
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-3.jpg",
-      rating: 4,
-      time: "12 hours",
+      rate: 4,
+      duration: "12 hours",
       alreadyPurchased: true
     },
     {
@@ -61,10 +61,10 @@ export default function Home() {
       description:
         "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
       price: 12,
-      image:
+      thumbnail:
         "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-4.jpg",
-      rating: 2.5,
-      time: "1 hour",
+      rate: 2.5,
+      duration: "1 hour",
       alreadyPurchased: true
     }
   ]
@@ -91,7 +91,6 @@ export default function Home() {
     }
 
     handleFilter()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery, sort.order])
 
   function handleFilter() {

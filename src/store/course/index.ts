@@ -1,3 +1,4 @@
+import { calculateTotalDuration } from "@helpers/calculate-total-duration"
 import { api } from "@services/axios"
 import { create } from "zustand"
 
@@ -28,6 +29,10 @@ export const useCourse = create<CourseStore>((set) => {
     course: Course,
     lectureId: string = ""
   ): LectureState => {
+    if (!course.lessons) {
+      return { current: null, previous: null, next: null }
+    }
+
     const lectures = course.lessons.reduce((acc, lesson) => {
       return [...acc, ...lesson.lectures]
     }, [] as Lecture[])
@@ -45,12 +50,11 @@ export const useCourse = create<CourseStore>((set) => {
       next: lectures[currentIndex + 1] || null
     }
   }
-
   const findActiveLesson = (
     course: Course,
     lectureId: string | null = null
   ): number => {
-    if (!course) return 0
+    if (!course || !course.lessons) return 0
 
     if (!lectureId) {
       const lectures = course.lessons.reduce((acc, lesson) => {
@@ -67,6 +71,8 @@ export const useCourse = create<CourseStore>((set) => {
   }
 
   const handleAllCompleted = (course: Course): boolean => {
+    if (!course.lessons) return false
+
     const lectures = course.lessons.reduce((acc, lesson) => {
       return [...acc, ...lesson.lectures]
     }, [] as Lecture[])
@@ -74,15 +80,34 @@ export const useCourse = create<CourseStore>((set) => {
     return lectures.every((lecture) => lecture.completed)
   }
 
+  const handleSetTime = (course: Course): Course => {
+    if (!course.lessons) return course
+
+    const duration = course.lessons.reduce((acc, { lectures }) => {
+      console.log(calculateTotalDuration(lectures).formated)
+
+      acc = acc + calculateTotalDuration(lectures).total
+      return acc
+    }, 0)
+
+    if (duration >= 3600) {
+      course.duration = `${Math.round(duration / 3600)}h`
+    } else {
+      course.duration = `${Math.floor((duration % 3600) / 60)}min`
+    }
+
+    return course
+  }
+
   return {
-    course: null, // Correção aqui
+    course: null,
     fetchCourse: async (id: string) => {
       try {
         const { data } = await api.get<Course>(`/course/${id}`)
         const course = data
         set(() => {
           return {
-            course,
+            course: handleSetTime(course),
             lecture: findInitialLectureState(course),
             activeLesson: findActiveLesson(course),
             done: handleAllCompleted(course)

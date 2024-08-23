@@ -96,8 +96,8 @@ export default function CourseSidebar({
       </div>
 
       <div className="flex flex-col overflow-y-auto pretty-scroll">
-        {course?.lessons.map(({ title, lectures }, index) => {
-          const duration = calculateTotalDuration(lectures)
+        {course?.lessons?.map(({ title, lectures }, index) => {
+          const duration = calculateTotalDuration(lectures).formated
           const numberLectures = lectures.length
           const completedLectures = lectures.filter(
             ({ completed }) => completed

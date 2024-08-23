@@ -21,8 +21,8 @@ export default function CourseContentAccordion({
 
   return (
     <div className={className} {...rest}>
-      {course?.lessons.map(({ title, lectures }, index) => {
-        const duration = calculateTotalDuration(lectures)
+      {course?.lessons?.map(({ title, lectures }, index) => {
+        const duration = calculateTotalDuration(lectures).formated
         const numberLectures = lectures.length
         return (
           <div
