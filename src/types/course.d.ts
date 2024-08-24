@@ -13,6 +13,8 @@ type Course = {
   title: string
   description: string
   thumbnail: string
-  rate: number
-  lessons: Lesson[]
+  price?: number
+  duration?: string
+  rate: RatingSize
+  lessons?: Lesson[]
 }

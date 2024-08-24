@@ -1,4 +1,6 @@
-import { api } from "@services/axios"
+import { calculateTotalDuration } from "@helpers/calculate-total-duration"
+import { db } from "@services/firebase-config"
+import { collection, doc, getDoc, getDocs } from "firebase/firestore"
 import { create } from "zustand"
 
 const INITIAL_LECTURE_STATE = {
@@ -23,11 +25,31 @@ export type CourseStore = {
   done: boolean
 }
 
+async function getCourse(courseId: string): Promise<Course> {
+  const courseRef = doc(db, "course", courseId)
+  const courseSnapshot = await getDoc(courseRef)
+  const courseData = courseSnapshot.data() as Course
+
+  if (courseSnapshot.exists()) {
+    const lessonsRef = collection(courseRef, "lessons")
+    const lessonsSnapshot = await getDocs(lessonsRef)
+    const lessons = lessonsSnapshot.docs.map((doc) => doc.data() as Lesson)
+
+    courseData.lessons = lessons
+  }
+
+  return courseData
+}
+
 export const useCourse = create<CourseStore>((set) => {
   const findInitialLectureState = (
     course: Course,
     lectureId: string = ""
   ): LectureState => {
+    if (!course.lessons) {
+      return { current: null, previous: null, next: null }
+    }
+
     const lectures = course.lessons.reduce((acc, lesson) => {
       return [...acc, ...lesson.lectures]
     }, [] as Lecture[])
@@ -45,12 +67,11 @@ export const useCourse = create<CourseStore>((set) => {
       next: lectures[currentIndex + 1] || null
     }
   }
-
   const findActiveLesson = (
     course: Course,
     lectureId: string | null = null
   ): number => {
-    if (!course) return 0
+    if (!course || !course.lessons) return 0
 
     if (!lectureId) {
       const lectures = course.lessons.reduce((acc, lesson) => {
@@ -67,6 +88,8 @@ export const useCourse = create<CourseStore>((set) => {
   }
 
   const handleAllCompleted = (course: Course): boolean => {
+    if (!course.lessons) return false
+
     const lectures = course.lessons.reduce((acc, lesson) => {
       return [...acc, ...lesson.lectures]
     }, [] as Lecture[])
@@ -74,15 +97,34 @@ export const useCourse = create<CourseStore>((set) => {
     return lectures.every((lecture) => lecture.completed)
   }
 
+  const handleSetTime = (course: Course): Course => {
+    if (!course.lessons) return course
+
+    const duration = course.lessons.reduce((acc, { lectures }) => {
+      console.log(calculateTotalDuration(lectures).formated)
+
+      acc = acc + calculateTotalDuration(lectures).total
+      return acc
+    }, 0)
+
+    if (duration >= 3600) {
+      course.duration = `${Math.round(duration / 3600)}h`
+    } else {
+      course.duration = `${Math.floor((duration % 3600) / 60)}min`
+    }
+
+    return course
+  }
+
   return {
-    course: null, // Correção aqui
+    course: null,
     fetchCourse: async (id: string) => {
       try {
-        const { data } = await api.get<Course>(`/course/${id}`)
-        const course = data
+        const course = await getCourse(id)
+
         set(() => {
           return {
-            course,
+            course: handleSetTime(course),
             lecture: findInitialLectureState(course),
             activeLesson: findActiveLesson(course),
             done: handleAllCompleted(course)

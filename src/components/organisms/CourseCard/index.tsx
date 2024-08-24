@@ -11,7 +11,7 @@ const variants = tv({
 })
 type CourseCardProps = ComponentProps<"div"> &
   VariantProps<typeof variants> & {
-    data: CourseCard
+    data: Course
   }
 
 export default function CourseCard({
@@ -24,10 +24,10 @@ export default function CourseCard({
     id,
     title,
     description,
-    image,
-    rating = 0,
-    time,
+    thumbnail,
+    rate = 0,
     price,
+    duration,
     alreadyPurchased
   } = data
 
@@ -38,16 +38,20 @@ export default function CourseCard({
         className="relative"
         aria-label={title}
       >
-        <img className="w-full" src={image} alt={`Imagem do curso ${title}`} />
+        <img
+          className="w-full"
+          src={thumbnail}
+          alt={`Imagem do curso ${title}`}
+        />
 
         <div className="group absolute inset-0 bg-gradient-to-b from-transparent to-neutral-700/35">
           <FontAwesomeIcon
             icon="fa-solid fa-play"
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full grid place-items-center bg-neutral-900/70 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           />
-          {time && (
+          {duration && (
             <span className="absolute right-2.5 bottom-2.5 py-1 px-2.5 rounded bg-neutral-900/70 text-white text-xs font-medium">
-              {time}
+              {duration}
             </span>
           )}
         </div>
@@ -55,7 +59,7 @@ export default function CourseCard({
 
       <div className="px-1 py-2.5 flex flex-col flex-1">
         <div className="flex items-center justify-between">
-          <Rate size={rating} />
+          <Rate size={rate} />
 
           <div className="relative group">
             <Button className="p-1" aria-label="Mais opções">

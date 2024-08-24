@@ -6,7 +6,9 @@
  * dependendo da necessidade.
  *
  * @param {Array<{ duration: string }>} lectures - Um array de objetos representando aulas, onde cada objeto contém uma string `duration`.
- * @returns {string} A duração total de todas as aulas formatada como "HH:MM:SS" ou "MM:SS".
+ * @returns {Object} Um objeto contendo:
+ * - `total`: A duração total em segundos.
+ * - `formated`: A duração total formatada como uma string "HH:MM:SS" ou "MM:SS".
  *
  * @example
  * const lectures = [
@@ -14,18 +16,21 @@
  *   { duration: "00:03" }
  * ];
  * const totalDuration = calculateTotalDuration(lectures);
- * console.log(totalDuration); // "05:35"
+ * console.log(totalDuration.formated); // "05:35"
+ * console.log(totalDuration.total); // Total em segundos
  *
  * const lecturesWithHours = [
  *   { duration: "01:05:32" },
  *   { duration: "00:03" }
  * ];
  * const totalDurationWithHours = calculateTotalDuration(lecturesWithHours);
- * console.log(totalDurationWithHours); // "01:05:35"
+ * console.log(totalDurationWithHours.formated); // "01:05:35"
+ * console.log(totalDurationWithHours.total); // Total em segundos
  */
-export function calculateTotalDuration(
-  lectures: { duration: string }[]
-): string {
+export function calculateTotalDuration(lectures: { duration: string }[]): {
+  total: number
+  formated: string
+} {
   const total = lectures.reduce((acc, lecture) => {
     const parts = lecture.duration.split(":").map(Number)
 
@@ -45,16 +50,23 @@ export function calculateTotalDuration(
   const totalMinutes = Math.floor((total % 3600) / 60)
   const remainingSeconds = total % 60
 
+  let formated: string
+
   if (totalHours > 0) {
     // Retorna no formato HH:MM:SS
     const formattedHours = String(totalHours).padStart(2, "0")
     const formattedMinutes = String(totalMinutes).padStart(2, "0")
     const formattedSeconds = String(remainingSeconds).padStart(2, "0")
-    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
+    formated = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
   } else {
     // Retorna no formato MM:SS
     const formattedMinutes = String(totalMinutes).padStart(2, "0")
     const formattedSeconds = String(remainingSeconds).padStart(2, "0")
-    return `${formattedMinutes}:${formattedSeconds}`
+    formated = `${formattedMinutes}:${formattedSeconds}`
+  }
+
+  return {
+    total, // Total em segundos
+    formated
   }
 }
