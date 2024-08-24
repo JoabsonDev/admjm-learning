@@ -10,7 +10,9 @@ export default {
         pulse: "pulse 1s ease-in-out infinite",
         "pulse-bullet-red": "pulse-bullet-animation-red 1.5s infinite",
         "pulse-bullet-green": "pulse-bullet-animation-green 1.5s infinite",
-        shimmer: "shimmer 1.5s infinite linear"
+        shimmer: "shimmer 1.5s infinite linear",
+        "slide-in": "slide-in 0.3s ease-in-out forwards",
+        "slide-out": "slide-out 0.3s ease-in-out forwards"
       },
       keyframes: {
         pulse: {
@@ -37,6 +39,26 @@ export default {
         shimmer: {
           "0%": { backgroundPosition: "200% 0" },
           "100%": { backgroundPosition: "-200% 0" }
+        },
+        "slide-in": {
+          "0%": {
+            transform: "translateX(100%)",
+            opacity: "0"
+          },
+          "100%": {
+            transform: "translateX(0)",
+            opacity: "1"
+          }
+        },
+        "slide-out": {
+          "0%": {
+            transform: "translateX(0)",
+            opacity: "1"
+          },
+          "100%": {
+            transform: "translateX(100%)",
+            opacity: "0"
+          }
         }
       }
     }

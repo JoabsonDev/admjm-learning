@@ -9,6 +9,8 @@ const variants = tv({
 type DialogProps = Omit<ComponentProps<"dialog">, "aria-labelledby"> &
   VariantProps<typeof variants> & {
     open?: boolean
+    onClose?: () => void
+    hasCloseButton?: boolean
   }
 
 // TODO: criar transições entre outras propriedades do dialog
@@ -17,6 +19,8 @@ export default function Dialog({
   title,
   open,
   children,
+  onClose,
+  hasCloseButton = true,
   ...rest
 }: DialogProps) {
   className = variants({ className })
@@ -26,9 +30,10 @@ export default function Dialog({
   const handleClose = useCallback(() => {
     if (!dialogRef.current) return
 
+    onClose?.()
     dialogRef.current.close()
     document.body.classList.remove("overflow-hidden")
-  }, [])
+  }, [onClose])
 
   useEffect(() => {
     if (!dialogRef.current) return
@@ -62,7 +67,7 @@ export default function Dialog({
     return () => {
       currentDialogRef.removeEventListener("click", handleBackdropClick)
     }
-  }, [handleClose, open])
+  }, [open])
 
   return (
     <dialog
@@ -72,19 +77,21 @@ export default function Dialog({
       aria-labelledby={title ? "title" : undefined}
     >
       <div className="rounded-lg overflow-hidden bg-white mx-4 relative">
-        <div className="border-b px-4 pt-4 pb-3  border-neutral-200">
+        <div className="border-b px-4 pt-4 pb-3 border-neutral-200 min-h-12">
           {title && (
             <h2 id="title" className="font-semibold text-neutral-700">
               {title}
             </h2>
           )}
-          <button
-            className="absolute right-1 top-1 px-1.5 hover:text-red-500 focus-visible:text-red-500 transition duration-200 text-lg"
-            onClick={handleClose}
-            aria-label="fechar modal"
-          >
-            <FontAwesomeIcon icon="fa-solid fa-xmark" />
-          </button>
+          {hasCloseButton && (
+            <button
+              className="absolute right-1 top-1 px-1.5 hover:text-red-500 focus-visible:text-red-500 transition duration-200 text-lg"
+              onClick={handleClose}
+              aria-label="fechar modal"
+            >
+              <FontAwesomeIcon icon="fa-solid fa-xmark" />
+            </button>
+          )}
         </div>
 
         <div className="p-4">{children}</div>

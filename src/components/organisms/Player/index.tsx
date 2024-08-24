@@ -139,7 +139,10 @@ export default function Player({ className, ...rest }: PlayerProps) {
             </a>
           )}
 
-          <YouTubePlayer videoId={lectureId} onFinish={handleFinish} />
+          <YouTubePlayer
+            videoId={lecture.current?.video.ref}
+            onFinish={handleFinish}
+          />
 
           {next && (
             <a
@@ -175,7 +178,7 @@ export default function Player({ className, ...rest }: PlayerProps) {
                       <div className="p-4">
                         <ul className="list-decimal text-neutral-600 mb-6">
                           <h3 className="text-neutral-700 font-semibold mb-2">
-                            <i className="fas fa-info-circle text-blue-500"></i>{" "}
+                            <i className="fa-solid fa-info-circle text-blue-500"></i>{" "}
                             {details.guidelines.title}
                           </h3>
                           {details.guidelines.items.map((item) => (
@@ -187,7 +190,7 @@ export default function Player({ className, ...rest }: PlayerProps) {
 
                         <ul className="list-decimal text-neutral-600">
                           <h3 className="text-neutral-700 font-semibold mb-2">
-                            <i className="fas fa-exclamation-circle text-red-500"></i>{" "}
+                            <i className="fa-solid fa-exclamation-circle text-red-500"></i>{" "}
                             {details.rules.title}
                           </h3>
                           {details.rules.items.map((item) => (

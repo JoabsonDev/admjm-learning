@@ -21,12 +21,12 @@ export default function CourseContentAccordion({
 
   return (
     <div className={className} {...rest}>
-      {course?.lessons?.map(({ title, lectures }, index) => {
+      {course?.lessons?.map(({ title, lectures, id }, index) => {
         const duration = calculateTotalDuration(lectures).formated
         const numberLectures = lectures.length
         return (
           <div
-            key={title}
+            key={id}
             className={`grid overflow-hidden border border-neutral-200 border-b-transparent transition-all duration-300 ease-in-out ${
               activeIndex === index
                 ? "grid-rows-[auto_1fr]"
