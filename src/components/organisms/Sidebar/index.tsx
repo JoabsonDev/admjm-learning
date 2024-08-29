@@ -38,6 +38,11 @@ export default function Sidebar({ className, ...rest }: SidebarProps) {
       to: "/certificates"
     },
     {
+      title: "Admin",
+      icon: <FontAwesomeIcon icon="fa-solid fa-clapperboard text-md w-6" />,
+      to: "/admin"
+    },
+    {
       title: "divider",
       divider: true
     },

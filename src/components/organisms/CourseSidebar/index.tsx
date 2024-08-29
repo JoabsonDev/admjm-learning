@@ -96,7 +96,7 @@ export default function CourseSidebar({
       </div>
 
       <div className="flex flex-col overflow-y-auto pretty-scroll">
-        {course?.lessons?.map(({ title, lectures }, index) => {
+        {course?.lessons?.map(({ title, lectures, id }, index) => {
           const duration = calculateTotalDuration(lectures).formated
           const numberLectures = lectures.length
           const completedLectures = lectures.filter(
@@ -105,7 +105,7 @@ export default function CourseSidebar({
 
           return (
             <div
-              key={title}
+              key={id}
               className={`grid transition-all duration-300 ease-in-out ${
                 activeIndex === index
                   ? "grid-rows-[auto_1fr]"

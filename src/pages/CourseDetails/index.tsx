@@ -2,6 +2,7 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Rate from "@atoms/Rate"
 import CourseContentAccordion from "@organisms/CourseContentAccordion"
+import { courseService } from "@services/course"
 import { useCourse } from "@store/course"
 import { useEffect } from "react"
 import { useQuery } from "react-query"
@@ -10,13 +11,19 @@ import { useParams } from "react-router-dom"
 export default function CourseDetails() {
   const { courseId } = useParams()
 
-  const { fetchCourse, course } = useCourse(({ fetchCourse, course }) => ({
-    fetchCourse,
+  const { getCourse } = courseService
+  const { setCourse, course } = useCourse(({ setCourse, course }) => ({
+    setCourse,
     course
   }))
   const { isLoading } = useQuery(
     ["course", courseId],
-    () => fetchCourse(courseId!),
+    async () => {
+      if (courseId) {
+        const course = await getCourse(courseId)
+        if (course) setCourse(course)
+      }
+    },
     { refetchOnWindowFocus: false }
   )
 
@@ -31,7 +38,7 @@ export default function CourseDetails() {
           {course?.thumbnail ? (
             <img
               className="rounded-[4px]"
-              src={course?.thumbnail}
+              src={course?.thumbnail?.url}
               alt={`Imagem do curso ${course?.title || ""}`}
             />
           ) : (

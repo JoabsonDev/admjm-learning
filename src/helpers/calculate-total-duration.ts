@@ -1,3 +1,5 @@
+import { formatDuration } from "./formate-duration"
+
 /**
  * Calcula a duração total de todas as aulas.
  *
@@ -46,27 +48,10 @@ export function calculateTotalDuration(lectures: { duration: string }[]): {
     return acc + seconds
   }, 0)
 
-  const totalHours = Math.floor(total / 3600)
-  const totalMinutes = Math.floor((total % 3600) / 60)
-  const remainingSeconds = total % 60
-
-  let formated: string
-
-  if (totalHours > 0) {
-    // Retorna no formato HH:MM:SS
-    const formattedHours = String(totalHours).padStart(2, "0")
-    const formattedMinutes = String(totalMinutes).padStart(2, "0")
-    const formattedSeconds = String(remainingSeconds).padStart(2, "0")
-    formated = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
-  } else {
-    // Retorna no formato MM:SS
-    const formattedMinutes = String(totalMinutes).padStart(2, "0")
-    const formattedSeconds = String(remainingSeconds).padStart(2, "0")
-    formated = `${formattedMinutes}:${formattedSeconds}`
-  }
+  const formated = formatDuration(total)
 
   return {
-    total, // Total em segundos
+    total,
     formated
   }
 }

@@ -2,6 +2,7 @@ import CourseSidebar from "@organisms/CourseSidebar"
 import Footer from "@organisms/Footer"
 import Header from "@organisms/Header"
 import Player from "@organisms/Player"
+import { courseService } from "@services/course"
 import { useCourse } from "@store/course"
 import { useSidebarStore } from "@store/sidebar"
 import { useEffect } from "react"
@@ -22,14 +23,20 @@ export default function Course() {
   const className = variants({ hasAside: isVisible })
   const { courseId, lectureId } = useParams()
 
-  const { fetchCourse, lecture } = useCourse(({ fetchCourse, lecture }) => ({
-    fetchCourse,
+  const { getCourse } = courseService
+  const { setCourse, lecture } = useCourse(({ setCourse, lecture }) => ({
+    setCourse,
     lecture
   }))
 
   const { isLoading } = useQuery(
     ["course", courseId],
-    () => fetchCourse(courseId!),
+    async () => {
+      if (courseId) {
+        const course = await getCourse(courseId)
+        if (course) setCourse(course)
+      }
+    },
     { refetchOnWindowFocus: false }
   )
 

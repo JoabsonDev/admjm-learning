@@ -34,7 +34,7 @@ export default function CourseCard({
   return (
     <div className={className} {...rest}>
       <NavLink
-        to={alreadyPurchased ? `/course/${id}/details` : `/course/${id}`}
+        to={!alreadyPurchased ? `/course/${id}/details` : `/course/${id}`}
         className="relative"
         aria-label={title}
       >

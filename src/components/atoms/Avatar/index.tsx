@@ -3,7 +3,7 @@ import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "flex items-center justify-center rounded-full aspect-square bg-neutral-300",
+  base: "flex items-center justify-center rounded-full aspect-square bg-neutral-300 border border-neutral-300 overflow-hidden",
   variants: {
     size: {
       sm: "w-8",
@@ -33,7 +33,9 @@ export default function Avatar({
           {shortName(name)}
         </span>
       )}
-      {src && <img src={src} alt={name} />}
+      {src && (
+        <img src={src} alt={name} className="w-full h-full object-cover" />
+      )}
     </div>
   )
 }
