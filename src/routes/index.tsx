@@ -11,6 +11,7 @@ import Lessons from "@pages/Lessons"
 import SignIn from "@pages/SignIn"
 import SignUp from "@pages/SignUp"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
+import { PrivateRoutes } from "./private"
 
 export default function Router() {
   return (
@@ -21,28 +22,33 @@ export default function Router() {
           <Route path="sign-up" element={<SignUp />} />
           <Route path="forgot-password" element={<ForgotPassword />} />
         </Route>
-        <Route path="/" element={<Dashboard />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/course-manager" element={<CourseManager />} />
-          <Route
-            path="/admin/course-manager/:courseId"
-            element={<CourseManager />}
-          />
-          <Route
-            path="/admin/course-manager/:courseId/lessons"
-            element={<Lessons />}
-          />
-          <Route
-            path="/admin/course-manager/:courseId/lessons/:lessonId"
-            element={<Lesson />}
-          />
+        <Route path="/" element={<PrivateRoutes />}>
+          <Route path="/" element={<Dashboard />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/course-manager" element={<CourseManager />} />
+            <Route
+              path="/admin/course-manager/:courseId"
+              element={<CourseManager />}
+            />
+            <Route
+              path="/admin/course-manager/:courseId/lessons"
+              element={<Lessons />}
+            />
+            <Route
+              path="/admin/course-manager/:courseId/lessons/:lessonId"
+              element={<Lesson />}
+            />
 
-          <Route path="/course/:courseId/details" element={<CourseDetails />} />
-        </Route>
-        <Route path="/course" element={<Course />}>
-          <Route path=":courseId" element={<Course />}>
-            <Route path="lecture/:lectureId" element={<Course />} />
+            <Route
+              path="/course/:courseId/details"
+              element={<CourseDetails />}
+            />
+          </Route>
+          <Route path="/course" element={<Course />}>
+            <Route path=":courseId" element={<Course />}>
+              <Route path="lecture/:lectureId" element={<Course />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

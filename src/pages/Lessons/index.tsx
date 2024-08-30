@@ -126,7 +126,6 @@ export default function Lessons() {
               </p>
             ) : (
               <>
-                {" "}
                 <Table className="mt-8">
                   <Table.THead>
                     <Table.THead.TR>

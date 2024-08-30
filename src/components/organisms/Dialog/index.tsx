@@ -14,6 +14,8 @@ type DialogProps = Omit<ComponentProps<"dialog">, "aria-labelledby"> &
   }
 
 // TODO: criar transições entre outras propriedades do dialog
+// TODO: criar listener para entender se fechou com ESC para atualizar o estado
+// TODO: verificar problema ao apertar enter estando dentro do dialog
 export default function Dialog({
   className,
   title,
