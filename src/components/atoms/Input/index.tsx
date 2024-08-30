@@ -1,4 +1,5 @@
-import React, { ComponentProps, forwardRef } from "react"
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
+import React, { ComponentProps, forwardRef, useState } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
@@ -41,6 +42,7 @@ export default forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   className = variants({ className })
   const { icon, iconPosition = "left" } = config || {}
+  const [passwordVisible, setPasswordVisible] = useState(false)
 
   return (
     <div className={className}>
@@ -48,10 +50,22 @@ export default forwardRef<HTMLInputElement, InputProps>(function Input(
       <input
         ref={ref}
         className="border-none outline-none bg-transparent w-full text-sm text-neutral-600 disabled:cursor-not-allowed disabled:text-neutral-500"
-        type={type}
+        type={passwordVisible ? "text" : type}
         {...rest}
       />
       {icon && iconPosition === "right" && icon}
+      {type === "password" && (
+        <button
+          type="button"
+          onClick={() => setPasswordVisible(!passwordVisible)}
+          className="w-7 h-6 flex items-center justify-center"
+        >
+          <FontAwesomeIcon
+            icon={passwordVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye"}
+            className="text-sm text-neutral-600"
+          />
+        </button>
+      )}
     </div>
   )
 })

@@ -1,4 +1,4 @@
-import { ComponentProps } from "react"
+import { ComponentProps, forwardRef } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const labelVariants = tv({
@@ -34,14 +34,17 @@ type ToggleProps = Omit<ComponentProps<"input">, "type"> &
     accentColor?: AccentColors | `#${string}`
   }
 
-export default function Toggle({
-  className,
-  type,
-  label,
-  labelPosition = "right",
-  accentColor = "primary",
-  ...rest
-}: ToggleProps) {
+export default forwardRef<HTMLInputElement, ToggleProps>(function Toggle(
+  {
+    className,
+    type,
+    label,
+    labelPosition = "right",
+    accentColor = "primary",
+    ...rest
+  }: ToggleProps,
+  ref
+) {
   className = labelVariants({ className })
 
   let inputClassName = ""
@@ -60,10 +63,10 @@ export default function Toggle({
       {label && labelPosition === "left" && (
         <span className="-mb-[2px]">{label}</span>
       )}
-      <input type={type} className={inputClassName} {...rest} />
+      <input ref={ref} type={type} className={inputClassName} {...rest} />
       {label && labelPosition === "right" && (
         <span className="-mb-[2px]">{label}</span>
       )}
     </label>
   )
-}
+})
