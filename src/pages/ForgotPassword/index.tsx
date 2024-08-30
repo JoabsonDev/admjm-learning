@@ -2,17 +2,42 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
+import { authService } from "@services/auth"
+import { useAlert } from "@store/alert"
 import { useForm } from "react-hook-form"
+import { useMutation } from "react-query"
+import { useNavigate } from "react-router-dom"
+
+type User = {
+  email: string
+}
 
 export default function ForgotPassword() {
   const {
     register,
     formState: { errors, isValid },
     handleSubmit
-  } = useForm<User & { passwordConfirmation: string }>({ mode: "onTouched" })
+  } = useForm<User>({ mode: "onTouched" })
+
+  const { addAlert } = useAlert()
+  const navigate = useNavigate()
+
+  const forgotPasswordMutation = useMutation({
+    mutationFn: (email: string) => authService.resetPassword(email),
+    onSuccess: () => {
+      addAlert("E-mail de redefinição enviado com sucesso!", "success")
+      navigate("/auth/sign-in")
+    },
+    onError: () => {
+      addAlert(
+        `Erro ao enviar o e-mail de redefinição. Tente novamente!`,
+        "error"
+      )
+    }
+  })
 
   const handleSubmitForm = (data: User) => {
-    console.log(data)
+    forgotPasswordMutation.mutate(data.email)
   }
 
   return (
@@ -21,7 +46,7 @@ export default function ForgotPassword() {
       onSubmit={handleSubmit(handleSubmitForm)}
     >
       <h1 className="text-2xl font-semibold text-gray-800 mb-8">
-        Request a Password Reset
+        Solicitar uma redefinição de senha
       </h1>
 
       <div className="w-full">

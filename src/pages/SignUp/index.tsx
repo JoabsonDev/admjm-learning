@@ -3,8 +3,18 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Hr from "@atoms/Hr"
 import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
+import { authService } from "@services/auth"
+import { useAlert } from "@store/alert"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
+import { useMutation } from "react-query"
+
+type User = {
+  fullName: string
+  email: string
+  password: string
+  passwordConfirmation: string
+}
 
 export default function SignUp() {
   const {
@@ -12,13 +22,35 @@ export default function SignUp() {
     watch,
     formState: { errors, isValid },
     trigger,
-    handleSubmit
+    handleSubmit,
+    reset
   } = useForm<User & { passwordConfirmation: string }>({ mode: "onTouched" })
+
+  const { addAlert } = useAlert()
+
   const password = watch("password", "")
   const passwordConfirmation = watch("passwordConfirmation", "")
 
+  // TODO: pegar o UID do usuário para gerar a tabela user
+  const registerMutation = useMutation({
+    mutationFn: (data: User) => {
+      return authService.register(data.email, data.password)
+    },
+    onSuccess: () => {
+      addAlert("Cadastro efetuado com sucesso!", "success")
+      reset()
+    },
+    onError: () => {
+      addAlert(`Erro ao se cadastrar, tente novamente!`, "error")
+    }
+  })
+
+  useEffect(() => {
+    if (password && passwordConfirmation) trigger("passwordConfirmation")
+  }, [password, passwordConfirmation, trigger])
+
   const handleSubmitForm = (data: User) => {
-    console.log(data)
+    registerMutation.mutate(data)
   }
 
   const hasUppercase = (value: string) => /[A-Z]/.test(value)
@@ -26,17 +58,12 @@ export default function SignUp() {
   const hasNumber = (value: string) => /[0-9]/.test(value)
   const hasSpecialChar = (value: string) => /[!@#$%^&*(),.?":{}|<>]/.test(value)
 
-  useEffect(() => {
-    if (password && passwordConfirmation) trigger("passwordConfirmation")
-  }, [password, passwordConfirmation, trigger])
-
   return (
     <form
       className="bg-white p-12 rounded-lg shadow-lg flex flex-col gap-4 items-center max-w-lg w-full"
       onSubmit={handleSubmit(handleSubmitForm)}
     >
       <h1 className="text-2xl font-semibold text-gray-800">
-        {/* TODO: pegar o nome da aplicação dinamicamente */}
         Bem-vindo ao Cursus
       </h1>
 
@@ -46,6 +73,10 @@ export default function SignUp() {
 
       <div className="w-full">
         <Input
+          type="text"
+          {...register("fullName", {
+            required: "O nome completo é obrigatório"
+          })}
           config={{
             icon: (
               <FontAwesomeIcon
@@ -216,7 +247,7 @@ export default function SignUp() {
               />
             )
           }}
-          placeholder="Confirmar de senha"
+          placeholder="Confirmar senha"
         />
         {errors.passwordConfirmation && (
           <span className="text-xs text-red-500">

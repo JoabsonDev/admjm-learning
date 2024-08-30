@@ -5,7 +5,12 @@ import Hr from "@atoms/Hr"
 import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
 import Toggle from "@atoms/Toggle"
+import { authService } from "@services/auth"
+import { useAlert } from "@store/alert"
 import { useForm } from "react-hook-form"
+import { useMutation } from "react-query"
+
+const { loginWithGoogle, login } = authService
 
 export default function SignIn() {
   const {
@@ -18,19 +23,50 @@ export default function SignIn() {
     }
   >({ mode: "onTouched" })
 
+  const { addAlert } = useAlert()
+  const loginMutation = useMutation({
+    mutationFn: (data: User) => login(data.email, data.password),
+    onSuccess: () => {
+      addAlert("Login efetuado com sucesso!", "success")
+    },
+    onError: () => {
+      addAlert(
+        "Não foi possível realizar o login. Verifique se os dados foram inseridos corretamente!",
+        "error"
+      )
+    }
+  })
+
+  // TODO: pegar o UID do usuário para gerar a tabela user
+  const googleLoginMutation = useMutation({
+    mutationFn: () => loginWithGoogle(),
+    onSuccess: () => {
+      addAlert("Login com Google efetuado com sucesso!", "success")
+    },
+    onError: () => {
+      addAlert(`Erro ao autenticar com Google!`, "error")
+    }
+  })
+
   const handleSubmitForm = (data: User) => {
-    console.log(data)
+    loginMutation.mutate(data)
+  }
+
+  const handleGoogleLogin = () => {
+    googleLoginMutation.mutate()
   }
 
   return (
     <div className="bg-white p-12 rounded-lg shadow-lg flex flex-col items-center gap-4 max-w-lg w-full">
-      {" "}
       <h1 className="text-2xl font-semibold text-gray-800">Bem-vindo!</h1>
       <p className="text-sm text-gray-400 mb-8">
         {/* TODO: pegar o nome da aplicação dinamicamente */}
         Entre na sua conta do Cursus!
       </p>
-      <button className="flex items-center justify-center gap-2 w-full h-[38px] px-4 py-2 rounded border border-gray-300 font-medium text-sm hover:border-blue-500 transition duration-200">
+      <button
+        className="flex items-center justify-center gap-2 w-full h-[38px] px-4 py-2 rounded border border-gray-300 font-medium text-sm hover:border-blue-500 transition duration-200"
+        onClick={handleGoogleLogin}
+      >
         <img src={googleIcon} alt="ícone do google" className="w-5 h-5" />
         <span>Continue com o Google</span>
       </button>
