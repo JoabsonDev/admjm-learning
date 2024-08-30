@@ -7,5 +7,12 @@ type HrProps = ComponentProps<"hr"> & VariantProps<typeof variants> & {}
 export default function Hr({ className, ...rest }: HrProps) {
   className = variants({ className })
 
-  return <hr className={className} {...rest} />
+  return (
+    <hr
+      className={className}
+      {...rest}
+      aria-orientation="horizontal"
+      role="separator"
+    />
+  )
 }
