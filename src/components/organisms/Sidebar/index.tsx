@@ -2,9 +2,13 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Hr from "@atoms/Hr"
 import NavLink from "@atoms/NavLink"
+import { authService } from "@services/auth"
+import { useAlert } from "@store/alert"
 import { useSidebarStore } from "@store/sidebar"
 import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
+
+const { logout } = authService
 
 const variants = tv({
   base: "fixed flex flex-col z-10 w-60 bg-white top-16 bottom-0 pb-4 transition-all duration-300",
@@ -20,6 +24,8 @@ type SidebarProps = ComponentProps<"aside"> & VariantProps<typeof variants> & {}
 export default function Sidebar({ className, ...rest }: SidebarProps) {
   const { isVisible } = useSidebarStore(({ isVisible }) => ({ isVisible }))
   className = variants({ isVisible, className })
+
+  const { addAlert } = useAlert()
 
   const menuItems: SidebarItem[] = [
     {
@@ -54,8 +60,9 @@ export default function Sidebar({ className, ...rest }: SidebarProps) {
     {
       title: "Sair",
       icon: <FontAwesomeIcon icon="fa-solid fa-power-off text-lg w-6" />,
-      callback: () => {
-        console.log("Sair")
+      callback: async () => {
+        await logout()
+        addAlert("Você saiu da sua conta!", "success")
       }
     }
   ]
