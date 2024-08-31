@@ -6,9 +6,14 @@ import Hr from "@atoms/Hr"
 import NavLink from "@atoms/NavLink"
 import Search from "@atoms/Search"
 import { isSafeArea } from "@helpers/is-safe-area"
+import { authService } from "@services/auth"
+import { useAlert } from "@store/alert"
+import useAuthStore from "@store/auth"
 import { useSidebarStore } from "@store/sidebar"
 import { ComponentProps, useEffect, useRef, useState } from "react"
 import { tv, VariantProps } from "tailwind-variants"
+
+const { logout } = authService
 
 const variants = tv({
   base: "fixed z-10 w-full h-16 py-4 pr-4 flex items-center bg-white shadow"
@@ -20,6 +25,9 @@ export default function Header({ className, ...rest }: HeaderProps) {
     setIsVisible
   }))
   className = variants({ className })
+
+  const { addAlert } = useAlert()
+  const { user, loading } = useAuthStore()
 
   const [showSubMenu, setShowSubMenu] = useState<boolean>(false)
 
@@ -46,6 +54,13 @@ export default function Header({ className, ...rest }: HeaderProps) {
       document.removeEventListener("click", toggleSubMenu)
     }
   }, [showSubMenu])
+
+  const signOut = async () => {
+    await logout()
+    addAlert("Você saiu da sua conta!", "success")
+  }
+
+  if (loading && !user) return null
 
   return (
     <header className={className} {...rest}>
@@ -94,8 +109,8 @@ export default function Header({ className, ...rest }: HeaderProps) {
             >
               <Avatar
                 className="border border-white shadow-md overflow-hidden"
-                src="https://gambolthemes.net/html-items/cursus-new-demo/images/left-imgs/img-10.jpg"
-                name="Joabson Firmo da Silva"
+                src={user?.photoURL || undefined}
+                name={user?.displayName || undefined}
               />
             </Button>
 
@@ -108,15 +123,15 @@ export default function Header({ className, ...rest }: HeaderProps) {
                   <Avatar
                     size="md"
                     className="border border-white shadow-md overflow-hidden"
-                    src="https://gambolthemes.net/html-items/cursus-new-demo/images/left-imgs/img-10.jpg"
-                    name="Joabson Firmo da Silva"
+                    src={user?.photoURL || undefined}
+                    name={user?.displayName || undefined}
                   />
 
                   <div>
-                    <h6 className="text-sm font-medium">Joginder Singh</h6>
+                    <h6 className="text-sm font-medium">{user?.displayName}</h6>
 
                     <span className="text-neutral-500 text-xs">
-                      gambol943@gmail.com
+                      {user?.email}
                     </span>
                   </div>
                 </div>
@@ -126,18 +141,18 @@ export default function Header({ className, ...rest }: HeaderProps) {
                 <li className="p-1">
                   <NavLink
                     to={"/"}
-                    className="inline-block w-full text-sm py-2.5 px-4 text-gray-800 hover:bg-red-100 focus:bg-red-100 hover:no-underline"
+                    className="text-left inline-block w-full text-sm py-2.5 px-4 text-gray-800 hover:bg-red-100 focus:bg-red-100 hover:no-underline"
                   >
                     Account
                   </NavLink>
                 </li>
                 <li className="p-1">
-                  <NavLink
-                    to={"/"}
-                    className="inline-block w-full text-sm py-2.5 px-4 text-gray-800 hover:bg-red-100 focus:bg-red-100 hover:no-underline"
+                  <button
+                    className="text-left inline-block w-full text-sm py-2.5 px-4 text-gray-800 hover:bg-red-100 focus:bg-red-100 hover:no-underline"
+                    onClick={signOut}
                   >
-                    Sign Out
-                  </NavLink>
+                    Sair
+                  </button>
                 </li>
               </ul>
             )}

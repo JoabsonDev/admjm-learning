@@ -1,6 +1,8 @@
 import AlertWrapper from "@organisms/AlertWrapper"
 import Prompt from "@organisms/Prompt"
+import useAuthStore from "@store/auth"
 import { usePrompt } from "@store/prompt"
+import { useEffect } from "react"
 import { QueryClient, QueryClientProvider } from "react-query"
 import Router from "./routes"
 
@@ -11,6 +13,13 @@ export default function App() {
     config: { show, title, message, callback },
     setConfig
   } = usePrompt()
+
+  const { checkAuth } = useAuthStore()
+
+  useEffect(() => {
+    const unsubscribe = checkAuth()
+    return () => unsubscribe()
+  }, [checkAuth])
 
   return (
     <QueryClientProvider client={queryClient}>

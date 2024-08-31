@@ -7,12 +7,18 @@ import NavLink from "@atoms/NavLink"
 import Toggle from "@atoms/Toggle"
 import { authService } from "@services/auth"
 import { useAlert } from "@store/alert"
+import useAuthStore from "@store/auth"
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
+import { useNavigate } from "react-router-dom"
 
 const { loginWithGoogle, login } = authService
 
 export default function SignIn() {
+  const { setUser, user } = useAuthStore()
+  const navigate = useNavigate()
+
   const {
     register,
     formState: { errors, isValid },
@@ -25,7 +31,10 @@ export default function SignIn() {
 
   const { addAlert } = useAlert()
   const loginMutation = useMutation({
-    mutationFn: (data: User) => login(data.email, data.password),
+    mutationFn: async (data: User) => {
+      const userCredential = await login(data.email, data.password)
+      setUser(userCredential.user)
+    },
     onSuccess: () => {
       addAlert("Login efetuado com sucesso!", "success")
     },
@@ -55,6 +64,10 @@ export default function SignIn() {
   const handleGoogleLogin = () => {
     googleLoginMutation.mutate()
   }
+
+  useEffect(() => {
+    if (user) navigate("/")
+  }, [navigate, user])
 
   return (
     <div className="bg-white p-12 rounded-lg shadow-lg flex flex-col items-center gap-4 max-w-lg w-full">

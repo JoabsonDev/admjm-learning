@@ -1,4 +1,5 @@
 import { calculateTotalDuration } from "@helpers/calculate-total-duration"
+import { formatDuration } from "@helpers/formate-duration"
 import { create } from "zustand"
 
 const INITIAL_LECTURE_STATE = {
@@ -88,11 +89,7 @@ export const useCourse = create<CourseStore>((set) => {
       return acc
     }, 0)
 
-    if (duration >= 3600) {
-      course.duration = `${Math.round(duration / 3600)}h`
-    } else {
-      course.duration = `${Math.floor((duration % 3600) / 60)}min`
-    }
+    course.duration = formatDuration(duration)
 
     return course
   }
