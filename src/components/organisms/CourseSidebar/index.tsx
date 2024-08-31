@@ -143,7 +143,7 @@ export default function CourseSidebar({
                 className={activeIndex === index ? "" : "overflow-hidden"}
                 aria-hidden={activeIndex !== index}
               >
-                {lectures.map(({ title, duration, completed, id }) => {
+                {lectures.map(({ title, duration, completed, id, video }) => {
                   return (
                     <li key={title}>
                       <a
@@ -181,7 +181,7 @@ export default function CourseSidebar({
                           }`}
                         />
 
-                        {player && player.videoId === id && (
+                        {player && player.videoId === video.ref && (
                           <div
                             className="h-1 w-full rounded-sm bg-neutral-300 overflow-hidden"
                             aria-hidden={true}

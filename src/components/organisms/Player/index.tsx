@@ -117,14 +117,14 @@ export default function Player({ className, ...rest }: PlayerProps) {
 
   useEffect(() => {
     if (lectureId !== lecture.current?.id) setLecture(course!, lectureId!)
-  }, [lectureId])
+  }, [lectureId, lecture, course])
 
   useEffect(() => {
     setActiveStep(steps.findIndex((step) => !step.done) + 1 || 0)
   }, [])
 
   return (
-    lectureId && (
+    lectureId === lecture.current?.id && (
       <div className={className} {...rest}>
         <div className="relative">
           {previous && (
@@ -139,10 +139,12 @@ export default function Player({ className, ...rest }: PlayerProps) {
             </a>
           )}
 
-          <YouTubePlayer
-            videoId={lecture.current?.video.ref}
-            onFinish={handleFinish}
-          />
+          {!!lecture.current?.video.ref && (
+            <YouTubePlayer
+              videoId={lecture.current.video.ref}
+              onFinish={handleFinish}
+            />
+          )}
 
           {next && (
             <a

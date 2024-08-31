@@ -24,9 +24,9 @@ export type CourseStore = {
 }
 
 export const useCourse = create<CourseStore>((set) => {
-  const findInitialLectureState = (
+  const findLectureState = (
     course: Course,
-    lectureId: string = ""
+    lectureId: string | null
   ): LectureState => {
     if (!course.lessons) {
       return { current: null, previous: null, next: null }
@@ -36,9 +36,9 @@ export const useCourse = create<CourseStore>((set) => {
       return [...acc, ...lesson.lectures]
     }, [] as Lecture[])
 
-    const currentIndex = lectures.findIndex(
-      (lecture) => lecture.id === lectureId || !lecture.completed
-    )
+    let currentIndex = lectures.findIndex((lecture) => lecture.id === lectureId)
+    if (currentIndex === -1)
+      currentIndex = lectures.findIndex((lecture) => !lecture.completed)
 
     if (currentIndex === -1)
       return { current: null, previous: null, next: null }
@@ -68,7 +68,6 @@ export const useCourse = create<CourseStore>((set) => {
       lesson.lectures.find((lecture) => lecture.id === lectureId)
     )
   }
-
   const handleAllCompleted = (course: Course): boolean => {
     if (!course.lessons) return false
 
@@ -105,7 +104,7 @@ export const useCourse = create<CourseStore>((set) => {
         set(() => {
           return {
             course: handleSetTime(course),
-            lecture: findInitialLectureState(course),
+            lecture: findLectureState(course, null),
             activeLesson: findActiveLesson(course),
             done: handleAllCompleted(course)
           }
@@ -123,7 +122,7 @@ export const useCourse = create<CourseStore>((set) => {
     lecture: INITIAL_LECTURE_STATE,
     setLecture: (course: Course, lectureId: string | null = null) =>
       set(() => ({
-        lecture: findInitialLectureState(course, lectureId!)
+        lecture: findLectureState(course, lectureId!)
       })),
     activeLesson: 0,
     setActiveLesson: (course, lectureId) =>
