@@ -8,16 +8,14 @@ import Toggle from "@atoms/Toggle"
 import { authService } from "@services/auth"
 import { useAlert } from "@store/alert"
 import useAuthStore from "@store/auth"
-import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
-import { useNavigate } from "react-router-dom"
+import { Navigate } from "react-router-dom"
 
 const { loginWithGoogle, login } = authService
 
 export default function SignIn() {
   const { setUser, user } = useAuthStore()
-  const navigate = useNavigate()
 
   const {
     register,
@@ -65,9 +63,7 @@ export default function SignIn() {
     googleLoginMutation.mutate()
   }
 
-  useEffect(() => {
-    if (user) navigate("/")
-  }, [navigate, user])
+  if (user) return <Navigate to="/" />
 
   return (
     <div className="bg-white p-12 rounded-lg shadow-lg flex flex-col items-center gap-4 max-w-lg w-full">
