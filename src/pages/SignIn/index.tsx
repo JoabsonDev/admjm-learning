@@ -36,7 +36,9 @@ export default function SignIn() {
     onSuccess: () => {
       addAlert("Login efetuado com sucesso!", "success")
     },
-    onError: () => {
+    onError: (error) => {
+      console.log("opa!", error)
+
       addAlert(
         "Não foi possível realizar o login. Verifique se os dados foram inseridos corretamente!",
         "error"

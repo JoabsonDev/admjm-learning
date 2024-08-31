@@ -1,4 +1,7 @@
-import { auth } from "@services/firebase-config"
+import { FIREBASE_ERROR_MESSAGES } from "@constants/firebase-error-messages"
+import { auth, db } from "@services/firebase-config"
+import useAuthStore from "@store/auth"
+import { FirebaseError } from "firebase/app"
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -9,8 +12,10 @@ import {
   signOut,
   UserCredential
 } from "firebase/auth"
+import { doc, getDoc, setDoc } from "firebase/firestore"
 
 const provider = new GoogleAuthProvider()
+const authStore = useAuthStore.getState()
 
 export const authService = {
   /**
@@ -18,13 +23,41 @@ export const authService = {
    * @param {string} email - O email do usuário.
    * @param {string} password - A senha do usuário.
    * @returns {Promise<UserCredential>} Uma Promise que resolve para o credencial do usuário autenticado.
-   * @throws {Error} Se ocorrer um erro durante o login.
+   * @throws {FirebaseError} Se ocorrer um erro durante o login.
    */
   async login(email: string, password: string): Promise<UserCredential> {
     try {
-      return await signInWithEmailAndPassword(auth, email, password)
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      )
+      const user = userCredential.user
+
+      // Atualiza o estado global com os dados do usuário logado
+      authStore.setUser(user)
+
+      // Verifica se a tabela (documento) existe
+      const userDocRef = doc(db, "users", user.uid)
+      const userDoc = await getDoc(userDocRef)
+
+      if (!userDoc.exists()) {
+        // Cria a tabela (documento) com o UID do usuário como ID
+        await setDoc(userDocRef, {
+          createdAt: new Date()
+        })
+      }
+
+      return userCredential
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      if (error instanceof FirebaseError) {
+        throw new Error(
+          FIREBASE_ERROR_MESSAGES[
+            error.code as keyof typeof FIREBASE_ERROR_MESSAGES
+          ] || `Erro ao fazer login: ${error.message}`
+        )
+      }
+      throw new Error("Erro desconhecido ao fazer login.")
     }
   },
 
@@ -33,13 +66,20 @@ export const authService = {
    * @param {string} email - O email do usuário.
    * @param {string} password - A senha do usuário.
    * @returns {Promise<UserCredential>} Uma Promise que resolve para o credencial do usuário registrado.
-   * @throws {Error} Se ocorrer um erro durante o registro.
+   * @throws {FirebaseError} Se ocorrer um erro durante o registro.
    */
   async register(email: string, password: string): Promise<UserCredential> {
     try {
       return await createUserWithEmailAndPassword(auth, email, password)
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      if (error instanceof FirebaseError) {
+        throw new Error(
+          FIREBASE_ERROR_MESSAGES[
+            error.code as keyof typeof FIREBASE_ERROR_MESSAGES
+          ] || `Erro ao registrar usuário: ${error.message}`
+        )
+      }
+      throw new Error("Erro desconhecido ao registrar usuário.")
     }
   },
 
@@ -47,56 +87,89 @@ export const authService = {
    * Envia um email para recuperação de senha.
    * @param {string} email - O email do usuário para o qual o email de recuperação será enviado.
    * @returns {Promise<void>} Uma Promise que resolve quando o email de recuperação for enviado.
-   * @throws {Error} Se ocorrer um erro ao enviar o email de recuperação.
+   * @throws {FirebaseError} Se ocorrer um erro ao enviar o email de recuperação.
    */
   async resetPassword(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(auth, email)
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      if (error instanceof FirebaseError) {
+        throw new Error(
+          FIREBASE_ERROR_MESSAGES[
+            error.code as keyof typeof FIREBASE_ERROR_MESSAGES
+          ] || `Erro ao enviar email de recuperação: ${error.message}`
+        )
+      }
+      throw new Error("Erro desconhecido ao enviar email de recuperação.")
     }
   },
 
   /**
    * Faz logout do usuário autenticado.
    * @returns {Promise<void>} Uma Promise que resolve quando o logout for concluído.
-   * @throws {Error} Se ocorrer um erro durante o logout.
+   * @throws {FirebaseError} Se ocorrer um erro durante o logout.
    */
   async logout(): Promise<void> {
     try {
       await signOut(auth)
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      if (error instanceof FirebaseError) {
+        throw new Error(`Erro ao fazer logout: ${error.message}`)
+      }
+      throw new Error("Erro desconhecido ao fazer logout.")
     }
   },
 
   /**
    * Faz login com o Google.
    * @returns {Promise<UserCredential>} Uma Promise que resolve para o credencial do usuário autenticado com o Google.
-   * @throws {Error} Se ocorrer um erro durante o login com o Google.
+   * @throws {FirebaseError} Se ocorrer um erro durante o login com o Google.
    */
   async loginWithGoogle(): Promise<UserCredential> {
     try {
-      return await signInWithPopup(auth, provider)
+      const userCredential = await signInWithPopup(auth, provider)
+      const user = userCredential.user
+
+      // Atualiza o estado global com os dados do usuário logado
+      authStore.setUser(user)
+
+      // Verifica se a tabela (documento) existe
+      const userDocRef = doc(db, "users", user.uid)
+      const userDoc = await getDoc(userDocRef)
+
+      if (!userDoc.exists()) {
+        // Cria a tabela (documento) com o UID do usuário como ID
+        await setDoc(userDocRef, {
+          createdAt: new Date()
+        })
+      }
+
+      return userCredential
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      if (error instanceof FirebaseError) {
+        throw new Error(`Erro ao fazer login com o Google: ${error.message}`)
+      }
+      throw new Error("Erro desconhecido ao fazer login com o Google.")
     }
   },
 
   /**
    * Vincula a conta Google ao usuário autenticado.
    * @returns {Promise<void>} Uma Promise que resolve quando a conta for vinculada.
-   * @throws {Error} Se ocorrer um erro durante a vinculação da conta.
+   * @throws {FirebaseError} Se ocorrer um erro durante a vinculação da conta.
    */
   async linkGoogleAccount(): Promise<void> {
     try {
       if (auth.currentUser) {
         await linkWithPopup(auth.currentUser, provider)
       } else {
-        throw new Error("Usuário não autenticado")
+        throw new Error("Usuário não autenticado.")
       }
     } catch (error) {
-      throw new Error(error instanceof Error ? error.message : String(error))
+      if (error instanceof FirebaseError) {
+        throw new Error(`Erro ao vincular conta Google: ${error.message}`)
+      }
+      throw new Error("Erro desconhecido ao vincular conta Google.")
     }
   }
 }
