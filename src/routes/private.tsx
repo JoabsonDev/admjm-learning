@@ -4,7 +4,6 @@ import { Navigate, Outlet } from "react-router-dom"
 export function PrivateRoutes() {
   const { user, loading } = useAuthStore()
 
-  // TODO: criar um loader
   if (loading)
     return (
       <div
