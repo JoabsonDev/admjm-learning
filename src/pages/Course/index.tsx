@@ -3,7 +3,7 @@ import Footer from "@organisms/Footer"
 import Header from "@organisms/Header"
 import Player from "@organisms/Player"
 import { courseService } from "@services/course"
-import { useCourse } from "@store/course"
+import { useCourseStore } from "@store/course"
 import { useSidebarStore } from "@store/sidebar"
 import { useEffect } from "react"
 import { useQuery } from "react-query"
@@ -19,15 +19,12 @@ const variants = tv({
   }
 })
 export default function Course() {
-  const { isVisible } = useSidebarStore(({ isVisible }) => ({ isVisible }))
+  const { isVisible } = useSidebarStore()
   const className = variants({ hasAside: isVisible })
   const { courseId, lectureId } = useParams()
 
   const { getCourse } = courseService
-  const { setCourse, lecture } = useCourse(({ setCourse, lecture }) => ({
-    setCourse,
-    lecture
-  }))
+  const { setCourse, lecture } = useCourseStore()
 
   const { isLoading } = useQuery(
     ["course", courseId],

@@ -6,7 +6,7 @@ export type AlertStore = {
   removeAlert: (id: number) => void
 }
 
-export const useAlert = create<AlertStore>((set) => {
+export const useAlertStore = create<AlertStore>((set) => {
   const addAlert = (message: string, type: "success" | "error") => {
     const id = Date.now()
     set((state) => ({

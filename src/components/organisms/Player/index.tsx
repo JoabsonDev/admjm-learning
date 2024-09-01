@@ -2,7 +2,7 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Step from "@organisms/Step"
 import YouTubePlayer from "@organisms/YouTubePlayer"
-import { useCourse } from "@store/course"
+import { useCourseStore } from "@store/course"
 import { ComponentProps, useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { tv, VariantProps } from "tailwind-variants"
@@ -14,7 +14,7 @@ export default function Player({ className, ...rest }: PlayerProps) {
   className = variants({ className })
   const { courseId, lectureId } = useParams()
 
-  const { done, lecture, setLecture, course } = useCourse(
+  const { done, lecture, setLecture, course } = useCourseStore(
     ({ done, lecture, setLecture, course }) => ({
       done,
       lecture,

@@ -2,20 +2,27 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Rate from "@atoms/Rate"
 import CourseContentAccordion from "@organisms/CourseContentAccordion"
+import { cartService } from "@services/cart"
 import { courseService } from "@services/course"
-import { useCourse } from "@store/course"
+import { useAlertStore } from "@store/alert"
+import useAuthStore from "@store/auth"
+import useCartStore from "@store/cart"
+import { useCourseStore } from "@store/course"
 import { useEffect } from "react"
-import { useQuery } from "react-query"
+import { useMutation, useQuery } from "react-query"
 import { useParams } from "react-router-dom"
+
+const { getCourse } = courseService
+const { addItemToCart, removeItemFromCart } = cartService
 
 export default function CourseDetails() {
   const { courseId } = useParams()
 
-  const { getCourse } = courseService
-  const { setCourse, course } = useCourse(({ setCourse, course }) => ({
-    setCourse,
-    course
-  }))
+  const { setCourse, course } = useCourseStore()
+  const { addItem, removeItem, items } = useCartStore()
+  const { user } = useAuthStore()
+  const { addAlert } = useAlertStore()
+
   const { isLoading } = useQuery(
     ["course", courseId],
     async () => {
@@ -26,6 +33,48 @@ export default function CourseDetails() {
     },
     { refetchOnWindowFocus: false }
   )
+
+  const addCartMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      if (user?.uid) {
+        return addItemToCart(user.uid, courseId)
+      }
+      throw new Error("User ID is undefined")
+    },
+    onSuccess: () => {
+      addItem(courseId!)
+      addAlert("Curso adicionado ao carrinho com sucesso!", "success")
+      console.log("Curso adicionado ao carrinho com sucesso!")
+    },
+    onError: (error) => {
+      console.error("Erro ao adicionar curso ao carrinho:", error)
+    }
+  })
+
+  const removeCartMutation = useMutation({
+    mutationFn: async (courseId: string) => {
+      if (user?.uid) {
+        return removeItemFromCart(user.uid, courseId)
+      }
+      throw new Error("User ID is undefined")
+    },
+    onSuccess: () => {
+      removeItem(courseId!)
+      addAlert("Curso removido do carrinho com sucesso!", "success")
+      console.log("Curso removido do carrinho com sucesso!")
+    },
+    onError: (error) => {
+      console.error("Erro ao remover curso do carrinho:", error)
+    }
+  })
+
+  const handleCartClick = () => {
+    if (items.includes(courseId!)) {
+      removeCartMutation.mutate(courseId!)
+    } else {
+      addCartMutation.mutate(courseId!)
+    }
+  }
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -63,11 +112,14 @@ export default function CourseDetails() {
             <Button
               color="danger"
               className="border border-transparent hover:bg-red-600"
+              onClick={handleCartClick}
             >
-              Add to Cart
+              {items.includes(courseId!)
+                ? "Remover do carrinho"
+                : "Adicionar ao carrinho"}
             </Button>
             <Button className="border border-white hover:bg-neutral-700">
-              Buy Now
+              Comprar agora
             </Button>
           </div>
         </div>

@@ -9,7 +9,10 @@ import {
   doc,
   getDoc,
   getDocs,
-  updateDoc
+  orderBy,
+  query,
+  updateDoc,
+  where
 } from "firebase/firestore"
 import {
   deleteObject,
@@ -22,14 +25,39 @@ const { getLessons } = lessonService
 
 export const courseService = {
   /**
-   * Recupera todos os cursos do Firestore e carrega as lições associadas a cada curso.
+   * Recupera todos os cursos do Firestore com filtros opcionais e ordenação opcional.
+   * @param {string} titleFilter - Texto para filtrar o título do curso (semelhante ao SQL LIKE).
+   * @param {("asc" | "desc")} [order] - Define a ordenação pelo título como ascendente ou descendente. Se não for fornecido, não aplica ordenação.
    * @returns {Promise<Course[]>} Uma Promise que resolve para uma lista de cursos com suas lições associadas.
    * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos ou das lições.
    */
-  async getCourses(): Promise<Course[]> {
+  async getCourses(
+    titleFilter: string = "",
+    order: "asc" | "desc" | null = null
+  ): Promise<Course[]> {
     try {
+      // Cria a referência para a coleção de cursos
       const coursesRef = collection(db, "course")
-      const coursesSnapshot = await getDocs(coursesRef)
+
+      // Inicializa a query com possíveis filtros
+      let coursesQuery = query(coursesRef)
+
+      if (titleFilter) {
+        // Aplica o filtro semelhante ao LIKE do SQL
+        coursesQuery = query(
+          coursesRef,
+          where("title", ">=", titleFilter),
+          where("title", "<=", titleFilter + "\uf8ff")
+        )
+      }
+
+      // Aplica a ordenação, se especificada
+      if (order) {
+        coursesQuery = query(coursesQuery, orderBy("title", order))
+      }
+
+      // Executa a query
+      const coursesSnapshot = await getDocs(coursesQuery)
 
       const courses = await Promise.all(
         coursesSnapshot.docs.map(async (doc) => {

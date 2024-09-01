@@ -2,7 +2,7 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Switch from "@atoms/Switch"
 import { calculateTotalDuration } from "@helpers/calculate-total-duration"
-import { useCourse } from "@store/course"
+import { useCourseStore } from "@store/course"
 import { useSidebarStore } from "@store/sidebar"
 import { useYouTubeStore } from "@store/youtube"
 import { ComponentProps, useEffect, useState } from "react"
@@ -25,30 +25,15 @@ export default function CourseSidebar({
   className,
   ...rest
 }: CourseSidebarProps) {
-  const { isVisible, setIsVisible } = useSidebarStore(
-    ({ isVisible, setIsVisible }) => ({ isVisible, setIsVisible })
-  )
+  const { isVisible, setIsVisible } = useSidebarStore()
 
   className = variants({ isVisible, className })
 
-  const { autoplay, setAutoplay, player, setPlayer } = useYouTubeStore(
-    ({ autoplay, setAutoplay, player, setPlayer }) => ({
-      autoplay,
-      setAutoplay,
-      player,
-      setPlayer
-    })
-  )
+  const { autoplay, setAutoplay, player, setPlayer } = useYouTubeStore()
 
   const { courseId, lectureId } = useParams()
 
-  const { course, activeLesson, setActiveLesson } = useCourse(
-    ({ course, activeLesson, setActiveLesson }) => ({
-      course,
-      activeLesson,
-      setActiveLesson
-    })
-  )
+  const { course, activeLesson, setActiveLesson } = useCourseStore()
 
   const [activeIndex, setActiveIndex] = useState<number | null>(0)
 

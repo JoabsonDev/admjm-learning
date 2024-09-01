@@ -3,7 +3,7 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Hr from "@atoms/Hr"
 import NavLink from "@atoms/NavLink"
 import { authService } from "@services/auth"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { useSidebarStore } from "@store/sidebar"
 import { ComponentProps } from "react"
 import { tv, VariantProps } from "tailwind-variants"
@@ -22,10 +22,10 @@ const variants = tv({
 type SidebarProps = ComponentProps<"aside"> & VariantProps<typeof variants> & {}
 
 export default function Sidebar({ className, ...rest }: SidebarProps) {
-  const { isVisible } = useSidebarStore(({ isVisible }) => ({ isVisible }))
+  const { isVisible } = useSidebarStore()
   className = variants({ isVisible, className })
 
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
 
   const menuItems: SidebarItem[] = [
     {

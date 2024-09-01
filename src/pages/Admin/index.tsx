@@ -7,7 +7,7 @@ import PaginationShimmer from "@molecules/PaginationShimmer"
 import TableShimmer from "@molecules/TableShimmer"
 import Table from "@organisms/Table"
 import { courseService } from "@services/course"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { usePrompt } from "@store/prompt"
 import { useMutation, useQuery } from "react-query"
 import { NavLink } from "react-router-dom"
@@ -17,7 +17,7 @@ const { getCourses, deleteCourse } = courseService
 // TODO: desabilitar buttons para evitar multiplas requisições
 export default function Admin() {
   const { setConfig } = usePrompt()
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
 
   const getCoursesQuery = useQuery(
     ["courses"],

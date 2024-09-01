@@ -1,4 +1,4 @@
-type SortConfig = {
+type FilterConfig = {
   order: Order
   value: string
 }
