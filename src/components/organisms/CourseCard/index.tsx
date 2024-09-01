@@ -121,7 +121,7 @@ export default function CourseCard({
               >
                 <FontAwesomeIcon
                   icon="fa-solid fa-cart-shopping"
-                  className="text-base group-hover:text-lg transition-all duration-200"
+                  className="text-base group-hover:translate-x-1 transition-all duration-200"
                 />
               </Button>
             )}
