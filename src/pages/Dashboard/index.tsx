@@ -14,7 +14,7 @@ const variants = tv({
   }
 })
 export default function Dashboard() {
-  const { isVisible } = useSidebarStore(({ isVisible }) => ({ isVisible }))
+  const { isVisible } = useSidebarStore()
   const className = variants({ hasAside: isVisible })
   return (
     <div className="flex flex-col min-h-screen">

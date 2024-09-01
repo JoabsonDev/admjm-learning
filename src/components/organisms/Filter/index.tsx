@@ -7,25 +7,25 @@ const variants = tv({
   base: "flex items-center justify-end gap-1"
 })
 
-type SortProps = ComponentProps<"div"> &
+type FilterProps = ComponentProps<"div"> &
   VariantProps<typeof variants> & {
-    config: SortConfig
-    onSort?: (config: SortConfig) => void
+    config: FilterConfig
+    onFilter?: (config: FilterConfig) => void
   }
 
-export default function Sort({
+export default function Filter({
   className,
   config,
-  onSort,
+  onFilter,
   ...rest
-}: SortProps) {
+}: FilterProps) {
   className = variants({ className })
 
   function handleCheckboxChange(
     event: ChangeEvent<HTMLInputElement>,
     order: Order
   ) {
-    onSort?.({
+    onFilter?.({
       ...config,
       order: event.target.checked ? order : null
     })
@@ -65,7 +65,7 @@ export default function Sort({
         className="max-w-80 w-full flex bg-white border border-neutral-200 has-[:focus-visible]:border-neutral-300"
         placeholder="Filtrar pelo nome do curso"
         onChange={({ target }) => {
-          onSort?.({
+          onFilter?.({
             ...config,
             value: target.value
           })

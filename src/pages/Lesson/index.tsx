@@ -12,7 +12,7 @@ import Dialog from "@organisms/Dialog"
 import Table from "@organisms/Table"
 import { lectureService } from "@services/lecture"
 import { lessonService } from "@services/lesson"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { usePrompt } from "@store/prompt"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -29,7 +29,7 @@ export default function Lesson() {
 
   const { courseId, lessonId } = useParams()
   const { setConfig } = usePrompt()
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
 
   const lessonForm = useForm<Partial<Lesson>>({ mode: "onTouched" })
   const {

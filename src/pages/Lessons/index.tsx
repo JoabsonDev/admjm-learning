@@ -9,7 +9,7 @@ import TableShimmer from "@molecules/TableShimmer"
 import Dialog from "@organisms/Dialog"
 import Table from "@organisms/Table"
 import { lessonService } from "@services/lesson"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { usePrompt } from "@store/prompt"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
@@ -29,7 +29,7 @@ export default function Lessons() {
   const [lessonModal, setLessonModal] = useState<boolean>(false)
 
   const { setConfig } = usePrompt()
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
 
   // Query para obter as lições
   const lessonsQuery = useQuery(

@@ -4,7 +4,7 @@ import Hr from "@atoms/Hr"
 import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
 import { authService } from "@services/auth"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
@@ -26,7 +26,7 @@ export default function SignUp() {
     reset
   } = useForm<User & { passwordConfirmation: string }>({ mode: "onTouched" })
 
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
 
   const password = watch("password", "")
   const passwordConfirmation = watch("passwordConfirmation", "")

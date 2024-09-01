@@ -1,7 +1,7 @@
 import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import { calculateTotalDuration } from "@helpers/calculate-total-duration"
-import { useCourse } from "@store/course"
+import { useCourseStore } from "@store/course"
 import { ComponentProps, useState } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
@@ -15,7 +15,7 @@ export default function CourseContentAccordion({
 }: CourseContentAccordionProps) {
   className = variants({ className })
 
-  const { course } = useCourse(({ course }) => ({ course }))
+  const { course } = useCourseStore(({ course }) => ({ course }))
 
   const [activeIndex, setActiveIndex] = useState<number | null>(0)
 
@@ -53,7 +53,7 @@ export default function CourseContentAccordion({
               </div>
               <div className="basis-1/2 flex items-center justify-end text-neutral-500 text-sm md:text-base">
                 <span className="">
-                  {numberLectures} {numberLectures > 1 ? "lectures" : "lecture"}
+                  {numberLectures} {numberLectures > 1 ? "aulas" : "aula"}
                 </span>
                 <span className="block w-[42%] text-right">{duration}</span>
               </div>

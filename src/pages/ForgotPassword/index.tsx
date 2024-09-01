@@ -3,7 +3,7 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
 import { authService } from "@services/auth"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
 import { useNavigate } from "react-router-dom"
@@ -19,7 +19,7 @@ export default function ForgotPassword() {
     handleSubmit
   } = useForm<User>({ mode: "onTouched" })
 
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
   const navigate = useNavigate()
 
   const forgotPasswordMutation = useMutation({
