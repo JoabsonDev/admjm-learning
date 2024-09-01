@@ -53,7 +53,7 @@ export default function CourseContentAccordion({
               </div>
               <div className="basis-1/2 flex items-center justify-end text-neutral-500 text-sm md:text-base">
                 <span className="">
-                  {numberLectures} {numberLectures > 1 ? "lectures" : "lecture"}
+                  {numberLectures} {numberLectures > 1 ? "aulas" : "aula"}
                 </span>
                 <span className="block w-[42%] text-right">{duration}</span>
               </div>

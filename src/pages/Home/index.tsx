@@ -28,11 +28,6 @@ export default function Home() {
   //   alreadyPurchased: true
   // }
 
-  const { data, isLoading } = useQuery(["courses"], async () => {
-    const courses = await getCourses()
-    return courses
-  })
-
   const [pagination, setPagination] = useState({
     currentPage: 1,
     pageSize: 15,
@@ -43,6 +38,15 @@ export default function Home() {
     order: null,
     value: ""
   })
+
+  const { data, isLoading, isFetching, refetch } = useQuery(
+    ["courses"],
+    async () => {
+      const courses = await getCourses(filter.value, filter.order)
+      return courses
+    },
+    { refetchOnWindowFocus: false, keepPreviousData: true }
+  )
 
   const isMounted = useRef(false)
 
@@ -64,6 +68,8 @@ export default function Home() {
     }
 
     console.log(`Buscando por:`, createQueryParams(params))
+
+    refetch()
   }
 
   return (
@@ -92,8 +98,8 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {isLoading
-            ? Array.from({ length: 5 }).map((_, index) => (
+          {isLoading || isFetching
+            ? Array.from({ length: 4 }).map((_, index) => (
                 <CourseCardShimmer key={index} className="w-full max-w-full" />
               ))
             : data?.map((course) => (

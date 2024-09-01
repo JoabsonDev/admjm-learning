@@ -64,10 +64,10 @@ export default function CourseDetails() {
               color="danger"
               className="border border-transparent hover:bg-red-600"
             >
-              Add to Cart
+              Adicionar ao carrinho
             </Button>
             <Button className="border border-white hover:bg-neutral-700">
-              Buy Now
+              Comprar agora
             </Button>
           </div>
         </div>
