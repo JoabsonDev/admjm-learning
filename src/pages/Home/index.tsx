@@ -3,7 +3,11 @@ import { useDebounce } from "@hooks/debounce"
 import Pagination from "@molecules/Pagination"
 import CourseCard from "@organisms/CourseCard"
 import Sort from "@organisms/Sort"
+import { courseService } from "@services/course"
 import { useEffect, useRef, useState } from "react"
+import { useQuery } from "react-query"
+
+const { getCourses } = courseService
 
 export default function Home() {
   // TODO: remover esses mocks ao integrar com firebase a lógica desses itens
@@ -13,63 +17,19 @@ export default function Home() {
     description:
       "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
     // price: 25,
-    thumbnail:
-      "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
+    thumbnail: {
+      url: "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
+      ref: ""
+    },
     rate: 4.5,
     duration: "25 hours",
     alreadyPurchased: true
   }
 
-  const featuredCourses: Course[] = [
-    {
-      id: "bTuVJqVVfoprKX7Tj221",
-      title: "Complete Python Bootcamp: Go from zero to hero in Python 3",
-      description:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
-      price: 25,
-      thumbnail:
-        "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
-      rate: 4.5,
-      duration: "25 hours",
-      alreadyPurchased: false
-    },
-    {
-      id: "2",
-      title: "The Complete JavaScript Course 2020: Build Real Projects!",
-      description:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
-      price: 20,
-      thumbnail:
-        "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-2.jpg",
-      rate: 3.5,
-      duration: "28 hours",
-      alreadyPurchased: false
-    },
-    {
-      id: "3",
-      title: "Beginning C++ Programming - From Beginner to Beyond",
-      description:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
-      price: 24.5,
-      thumbnail:
-        "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-3.jpg",
-      rate: 4,
-      duration: "12 hours",
-      alreadyPurchased: false
-    },
-    {
-      id: "4",
-      title: "The Complete Digital Marketing Course - 12 Courses in 1",
-      description:
-        "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
-      price: 12,
-      thumbnail:
-        "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-4.jpg",
-      rate: 2.5,
-      duration: "1 hour",
-      alreadyPurchased: false
-    }
-  ]
+  const { data } = useQuery(["courses"], async () => {
+    const courses = await getCourses()
+    return courses
+  })
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -129,7 +89,7 @@ export default function Home() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {featuredCourses.map((course) => (
+          {data?.map((course) => (
             <CourseCard
               className="w-full max-w-full"
               key={course.id}

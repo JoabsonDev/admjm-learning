@@ -35,14 +35,23 @@ export default function CourseCard({
     <div className={className} {...rest}>
       <NavLink
         to={!alreadyPurchased ? `/course/${id}/details` : `/course/${id}`}
-        className="relative"
+        className="relative hover:no-underline"
         aria-label={title}
       >
-        <img
-          className="w-full"
-          src={thumbnail}
-          alt={`Imagem do curso ${title}`}
-        />
+        {thumbnail?.url ? (
+          <img
+            className="w-full aspect-video object-cover"
+            src={thumbnail.url}
+            alt={`Imagem do curso ${title}`}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <FontAwesomeIcon
+              icon="fa-regular fa-image"
+              className="w-full aspect-video object-cover flex items-center justify-center text-[50px] text-neutral-500"
+            />
+          </div>
+        )}
 
         <div className="group absolute inset-0 bg-gradient-to-b from-transparent to-neutral-700/35">
           <FontAwesomeIcon
