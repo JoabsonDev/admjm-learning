@@ -15,6 +15,8 @@ export function isSafeArea(
   target: HTMLElement,
   safeArea: HTMLElement
 ): boolean {
+  if (!target || !safeArea) return false
+
   const elements = [...safeArea.getElementsByTagName("*")]
 
   return elements.includes(target)
