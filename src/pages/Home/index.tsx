@@ -3,6 +3,7 @@ import { useDebounce } from "@hooks/debounce"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
 import FilterShimmer from "@molecules/FilterShimmer"
 import Pagination from "@molecules/Pagination"
+import PaginationShimmer from "@molecules/PaginationShimmer"
 import CourseCard from "@organisms/CourseCard"
 import Filter from "@organisms/Filter"
 import { courseService } from "@services/course"
@@ -111,16 +112,20 @@ export default function Home() {
               ))}
         </div>
 
-        <Pagination
-          className="mt-10"
-          data={pagination}
-          onPageChange={(page) =>
-            setPagination({ ...pagination, currentPage: page })
-          }
-          setPaginationLabel={({ start, end, total }, setLabel) => {
-            setLabel(`${start} - ${end} de ${total} cursos`)
-          }}
-        />
+        {isLoading || isFetching ? (
+          <PaginationShimmer className="mt-10" />
+        ) : (
+          <Pagination
+            className="mt-10"
+            data={pagination}
+            onPageChange={(page) =>
+              setPagination({ ...pagination, currentPage: page })
+            }
+            setPaginationLabel={({ start, end, total }, setLabel) => {
+              setLabel(`${start} - ${end} de ${total} cursos`)
+            }}
+          />
+        )}
       </div>
     </div>
   )
