@@ -6,7 +6,7 @@ import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
 import Toggle from "@atoms/Toggle"
 import { authService } from "@services/auth"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import useAuthStore from "@store/auth"
 import { useForm } from "react-hook-form"
 import { useMutation } from "react-query"
@@ -27,7 +27,7 @@ export default function SignIn() {
     }
   >({ mode: "onTouched" })
 
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
   const loginMutation = useMutation({
     mutationFn: async (data: User) => {
       const userCredential = await login(data.email, data.password)

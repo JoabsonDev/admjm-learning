@@ -7,13 +7,17 @@ import NavLink from "@atoms/NavLink"
 import Search from "@atoms/Search"
 import { isSafeArea } from "@helpers/is-safe-area"
 import { authService } from "@services/auth"
-import { useAlert } from "@store/alert"
+import { cartService } from "@services/cart"
+import { useAlertStore } from "@store/alert"
 import useAuthStore from "@store/auth"
+import useCartStore from "@store/cart"
 import { useSidebarStore } from "@store/sidebar"
 import { ComponentProps, useEffect, useRef, useState } from "react"
+import { useQuery } from "react-query"
 import { tv, VariantProps } from "tailwind-variants"
 
 const { logout } = authService
+const { getCart } = cartService
 
 const variants = tv({
   base: "fixed z-10 w-full h-16 py-4 pr-4 flex items-center bg-white shadow"
@@ -26,8 +30,25 @@ export default function Header({ className, ...rest }: HeaderProps) {
   }))
   className = variants({ className })
 
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
   const { user, loading } = useAuthStore()
+  const { items, addItem } = useCartStore()
+
+  useQuery(
+    ["cart", user?.uid],
+    async () => {
+      if (user?.uid) {
+        const cart = await getCart(user?.uid)
+
+        if (cart) {
+          cart.forEach((item) => {
+            addItem(item)
+          })
+        }
+      }
+    },
+    { refetchOnWindowFocus: false }
+  )
 
   const [showSubMenu, setShowSubMenu] = useState<boolean>(false)
 
@@ -89,10 +110,15 @@ export default function Header({ className, ...rest }: HeaderProps) {
               <FontAwesomeIcon icon="fa-solid fa-bars" />
             </Button>
           </li>
+
           <li>
             <Button className="relative px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
               <FontAwesomeIcon icon="fa-solid fa-cart-shopping" />
-              <Badge className="absolute right-0 -top-[3px]">1</Badge>
+              {items.length > 0 && (
+                <Badge className="absolute right-0 -top-[3px]">
+                  {items.length}
+                </Badge>
+              )}
             </Button>
           </li>
           <li>

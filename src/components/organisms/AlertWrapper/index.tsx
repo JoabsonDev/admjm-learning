@@ -1,5 +1,5 @@
 import Alert from "@molecules/Alert"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { ComponentProps, useState } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
@@ -13,7 +13,7 @@ export default function AlertWrapper({
   className,
   ...rest
 }: AlertWrapperProps) {
-  const { alerts, removeAlert } = useAlert()
+  const { alerts, removeAlert } = useAlertStore()
   const [removingAlertId, setRemovingAlertId] = useState<number | null>(null)
 
   const handleAnimationEnd = (

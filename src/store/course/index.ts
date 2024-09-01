@@ -24,7 +24,7 @@ export type CourseStore = {
   done: boolean
 }
 
-export const useCourse = create<CourseStore>((set) => {
+export const useCourseStore = create<CourseStore>((set) => {
   const findLectureState = (
     course: Course,
     lectureId: string | null
