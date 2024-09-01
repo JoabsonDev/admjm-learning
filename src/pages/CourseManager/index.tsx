@@ -5,8 +5,8 @@ import NavLink from "@atoms/NavLink"
 import TextArea from "@atoms/TextArea"
 import ImageUploader from "@molecules/ImageUploader"
 import { courseService } from "@services/course"
-import { useAlert } from "@store/alert"
-import { useCourse } from "@store/course"
+import { useAlertStore } from "@store/alert"
+import { useCourseStore } from "@store/course"
 import { usePrompt } from "@store/prompt"
 
 import { useEffect, useState } from "react"
@@ -20,13 +20,10 @@ export default function CourseManager() {
   const { courseId } = useParams()
   const navigate = useNavigate()
 
-  const { setCourse, course } = useCourse(({ setCourse, course }) => ({
-    setCourse,
-    course
-  }))
+  const { setCourse, course } = useCourseStore()
 
   const { getCourse, createCourse, updateCourse } = courseService
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
   const { setConfig } = usePrompt()
 
   useQuery(

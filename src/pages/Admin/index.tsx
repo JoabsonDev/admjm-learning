@@ -7,7 +7,7 @@ import PaginationShimmer from "@molecules/PaginationShimmer"
 import TableShimmer from "@molecules/TableShimmer"
 import Table from "@organisms/Table"
 import { courseService } from "@services/course"
-import { useAlert } from "@store/alert"
+import { useAlertStore } from "@store/alert"
 import { usePrompt } from "@store/prompt"
 import { useMutation, useQuery } from "react-query"
 import { NavLink } from "react-router-dom"
@@ -17,7 +17,7 @@ const { getCourses, deleteCourse } = courseService
 // TODO: desabilitar buttons para evitar multiplas requisições
 export default function Admin() {
   const { setConfig } = usePrompt()
-  const { addAlert } = useAlert()
+  const { addAlert } = useAlertStore()
 
   const getCoursesQuery = useQuery(
     ["courses"],
@@ -50,13 +50,23 @@ export default function Admin() {
 
   return (
     <div className="py-8 px-4">
-      <h1 className="text-lg font-medium text-neutral-700">
-        <FontAwesomeIcon
-          icon="fa-solid fa-clapperboard"
-          className="text-md w-6"
-        />{" "}
-        Admin
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-medium text-neutral-700">
+          <FontAwesomeIcon
+            icon="fa-solid fa-clapperboard"
+            className="text-md w-6"
+          />{" "}
+          Admin
+        </h1>
+
+        <NavLink
+          to={"/"}
+          className="flex items-center gap-1 text-neutral-600 hover:text-neutral-700 transition duration-200"
+        >
+          <FontAwesomeIcon icon="fa-solid fa-circle-left" />
+          voltar
+        </NavLink>
+      </div>
 
       <div className="flex flex-col bg-white rounded-md mt-10 p-4 border border-neutral-200">
         {getCoursesQuery.isLoading ? (

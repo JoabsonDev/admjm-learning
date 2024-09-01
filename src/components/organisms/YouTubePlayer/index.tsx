@@ -50,9 +50,7 @@ export default function YouTubePlayer({
   const playerInstance = useRef<YT["Player"] | null>(null)
   const timeUpdateInterval = useRef<NodeJS.Timeout | null>(null)
 
-  const { autoplay, player, setPlayer } = useYouTubeStore(
-    ({ autoplay, player, setPlayer }) => ({ autoplay, player, setPlayer })
-  )
+  const { autoplay, player, setPlayer } = useYouTubeStore()
   if (autoplay === 1) options = { ...options, autoplay: 1 }
 
   useEffect(() => {
