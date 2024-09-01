@@ -1,4 +1,3 @@
-import { createQueryParams } from "@helpers/create-query-params"
 import { useDebounce } from "@hooks/debounce"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
 import FilterShimmer from "@molecules/FilterShimmer"
@@ -59,19 +58,8 @@ export default function Home() {
       return
     }
 
-    handleFilter()
-  }, [debouncedQuery, filter.order])
-
-  function handleFilter() {
-    const params = {
-      ...filter,
-      value: debouncedQuery
-    }
-
-    console.log(`Buscando por:`, createQueryParams(params))
-
     refetch()
-  }
+  }, [debouncedQuery, filter.order])
 
   return (
     <div className="pt-8 px-4">

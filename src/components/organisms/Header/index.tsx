@@ -112,14 +112,17 @@ export default function Header({ className, ...rest }: HeaderProps) {
           </li>
 
           <li>
-            <Button className="relative px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
+            <NavLink
+              to={"/cart"}
+              className="relative block px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none"
+            >
               <FontAwesomeIcon icon="fa-solid fa-cart-shopping" />
               {items.length > 0 && (
                 <Badge className="absolute right-0 -top-[3px]">
                   {items.length}
                 </Badge>
               )}
-            </Button>
+            </NavLink>
           </li>
           <li>
             <Button className="relative px-2 py-0 text-neutral-500 hover:text-gray-800 focus:text-gray-800 outline-none">
