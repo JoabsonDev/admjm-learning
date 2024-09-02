@@ -27,7 +27,10 @@ export default function AlertWrapper({
   }
 
   return (
-    <div className={variants({ className })} {...rest}>
+    <div
+      className={variants({ className })}
+      {...rest}
+    >
       {alerts.map((alert) => (
         <div
           key={alert.id}
