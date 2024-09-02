@@ -1,4 +1,5 @@
 import { FIREBASE_ERROR_MESSAGES } from "@constants/firebase-error-messages"
+import { courseService } from "@services/course"
 import { db } from "@services/firebase-config"
 import { FirebaseError } from "firebase/app"
 import {
@@ -8,6 +9,8 @@ import {
   getDoc,
   updateDoc
 } from "firebase/firestore"
+
+const { getCoursesByIds } = courseService
 
 export const cartService = {
   /**
@@ -86,6 +89,23 @@ export const cartService = {
         )
       }
       throw new Error("Erro desconhecido ao recuperar o carrinho.")
+    }
+  },
+
+  /**
+   * Recupera os detalhes dos cursos no carrinho do usuário.
+   * @param {string} userId - O ID do usuário.
+   * @returns {Promise<Course[]>} Uma Promise que resolve para uma lista de cursos no carrinho.
+   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos do carrinho.
+   */
+  async getCartCourses(userId: string): Promise<Course[]> {
+    try {
+      const cart = await cartService.getCart(userId)
+      if (!cart || cart.length === 0) return []
+
+      return await getCoursesByIds(cart)
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error))
     }
   }
 }
