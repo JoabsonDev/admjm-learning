@@ -4,12 +4,7 @@ import { ComponentProps, useState } from "react"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
-  base: "fixed right-0 top-0 z-50 min-w-60 pr-4",
-  variants: {
-    noEmpty: {
-      true: "pt-16"
-    }
-  }
+  base: "fixed right-0 top-16 z-50 min-w-60 pr-4"
 })
 
 type AlertWrapperProps = ComponentProps<"div"> & VariantProps<typeof variants>
@@ -33,7 +28,7 @@ export default function AlertWrapper({
 
   return (
     <div
-      className={variants({ className, noEmpty: alerts.length > 0 })}
+      className={variants({ className })}
       {...rest}
     >
       {alerts.map((alert) => (

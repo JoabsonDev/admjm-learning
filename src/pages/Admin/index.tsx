@@ -50,13 +50,23 @@ export default function Admin() {
 
   return (
     <div className="py-8 px-4">
-      <h1 className="text-lg font-medium text-neutral-700">
-        <FontAwesomeIcon
-          icon="fa-solid fa-clapperboard"
-          className="text-md w-6"
-        />{" "}
-        Admin
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-medium text-neutral-700">
+          <FontAwesomeIcon
+            icon="fa-solid fa-clapperboard"
+            className="text-md w-6"
+          />{" "}
+          Admin
+        </h1>
+
+        <NavLink
+          to={"/"}
+          className="flex items-center gap-1 text-neutral-600 hover:text-neutral-700 transition duration-200"
+        >
+          <FontAwesomeIcon icon="fa-solid fa-circle-left" />
+          voltar
+        </NavLink>
+      </div>
 
       <div className="flex flex-col bg-white rounded-md mt-10 p-4 border border-neutral-200">
         {getCoursesQuery.isLoading ? (

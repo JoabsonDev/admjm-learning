@@ -295,5 +295,36 @@ export const courseService = {
       console.error("Erro ao deletar o curso:", error)
       throw new Error(error instanceof Error ? error.message : String(error)) // Rejeita a Promise com um erro
     }
+  },
+  /**
+   * Recupera uma lista de cursos com base nos IDs fornecidos.
+   * @param {string[]} courseIds - Os IDs dos cursos a serem recuperados.
+   * @returns {Promise<Course[]>} Uma Promise que resolve para uma lista de cursos.
+   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos.
+   */
+  async getCoursesByIds(courseIds: string[]): Promise<Course[]> {
+    try {
+      const coursesRef = collection(db, "course")
+      const coursesQuery = query(coursesRef, where("__name__", "in", courseIds))
+
+      const coursesSnapshot = await getDocs(coursesQuery)
+
+      const courses = await Promise.all(
+        coursesSnapshot.docs.map(async (doc) => {
+          const courseData = doc.data() as Course
+          courseData.id = doc.id
+
+          // Carrega as lições associadas ao curso, se necessário
+          const lessons = await getLessons(doc.id)
+          courseData.lessons = lessons
+
+          return courseData
+        })
+      )
+
+      return courses
+    } catch (error) {
+      throw new Error(error instanceof Error ? error.message : String(error))
+    }
   }
 }
