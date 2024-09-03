@@ -23,7 +23,7 @@ export default function Admin() {
     ["courses"],
     async () => {
       try {
-        const courses = await getCourses()
+        const { courses } = await getCourses()
         return courses
       } catch {
         addAlert(

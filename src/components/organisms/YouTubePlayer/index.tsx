@@ -18,7 +18,7 @@ const INITIAL_PLAYER_VARS: PlayerVars = {
   autoplay: 0,
   cc_load_policy: 0,
   color: "red",
-  controls: 1,
+  controls: 0,
   disablekb: 0,
   enablejsapi: 0,
   // end: 0,

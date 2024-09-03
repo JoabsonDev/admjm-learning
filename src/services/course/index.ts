@@ -7,10 +7,14 @@ import {
   collection,
   deleteDoc,
   doc,
+  DocumentSnapshot,
+  getCountFromServer,
   getDoc,
   getDocs,
+  limit,
   orderBy,
   query,
+  startAfter,
   updateDoc,
   where
 } from "firebase/firestore"
@@ -25,25 +29,26 @@ const { getLessons } = lessonService
 
 export const courseService = {
   /**
-   * Recupera todos os cursos do Firestore com filtros opcionais e ordenação opcional.
+   * Recupera todos os cursos do Firestore com filtros opcionais, ordenação opcional e paginação.
    * @param {string} titleFilter - Texto para filtrar o título do curso (semelhante ao SQL LIKE).
    * @param {("asc" | "desc")} [order] - Define a ordenação pelo título como ascendente ou descendente. Se não for fornecido, não aplica ordenação.
-   * @returns {Promise<Course[]>} Uma Promise que resolve para uma lista de cursos com suas lições associadas.
+   * @param {number} pageLimit - Limite de cursos por página.
+   * @param {DocumentSnapshot | null} lastVisible - Documento a partir do qual iniciar a próxima página.
+   * @returns {Promise<ResponseWithPagination<"courses", Course>>} Uma Promise que resolve para uma lista de cursos paginada com suas lições associadas.
    * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos ou das lições.
    */
   async getCourses(
     titleFilter: string = "",
-    order: "asc" | "desc" | null = null
-  ): Promise<Course[]> {
+    order: "asc" | "desc" | null = null,
+    pageLimit: number = 10,
+    lastVisible: DocumentSnapshot | null = null
+  ): Promise<ResponseWithPagination<"courses", Course>> {
     try {
-      // Cria a referência para a coleção de cursos
       const coursesRef = collection(db, "course")
-
-      // Inicializa a query com possíveis filtros
-      let coursesQuery = query(coursesRef)
+      const coursesQueryRef = query(coursesRef)
+      let coursesQuery = query(coursesQueryRef)
 
       if (titleFilter) {
-        // Aplica o filtro semelhante ao LIKE do SQL
         coursesQuery = query(
           coursesRef,
           where("title", ">=", titleFilter),
@@ -51,20 +56,29 @@ export const courseService = {
         )
       }
 
-      // Aplica a ordenação, se especificada
       if (order) {
         coursesQuery = query(coursesQuery, orderBy("title", order))
       }
 
-      // Executa a query
+      if (lastVisible) {
+        coursesQuery = query(
+          coursesQuery,
+          startAfter(lastVisible),
+          limit(pageLimit)
+        )
+      } else {
+        coursesQuery = query(coursesQuery, limit(pageLimit))
+      }
+
       const coursesSnapshot = await getDocs(coursesQuery)
+      const newLastVisible =
+        coursesSnapshot.docs[coursesSnapshot.docs.length - 1]
 
       const courses = await Promise.all(
         coursesSnapshot.docs.map(async (doc) => {
           const courseData = doc.data() as Course
           courseData.id = doc.id
 
-          // Carrega as lições associadas ao curso
           const lessons = await getLessons(doc.id)
           const duration = lessons.reduce((acc, { lectures }) => {
             acc = acc + calculateTotalDuration(lectures).total
@@ -77,7 +91,19 @@ export const courseService = {
         })
       )
 
-      return courses
+      const snapshot = await getCountFromServer(coursesQueryRef)
+      const total = snapshot.data().count
+
+      const pagination = {
+        total,
+        lastVisible: newLastVisible,
+        pageLimit
+      }
+
+      return {
+        courses,
+        pagination
+      }
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error))
     }
@@ -99,8 +125,6 @@ export const courseService = {
       }
 
       const courseData = courseSnapshot.data() as Course
-
-      // Carrega as lições associadas ao curso
       const lessons = await getLessons(id)
       courseData.lessons = lessons
 
@@ -131,7 +155,6 @@ export const courseService = {
       let thumbnailData: { url: string; ref: string } | null = null
 
       if (thumbnail) {
-        // Adiciona a miniatura ao Firebase Storage
         const storageRef = ref(storage, `images/${thumbnail.name}`)
         const uploadThumbnail = uploadBytesResumable(storageRef, thumbnail)
 
@@ -150,7 +173,6 @@ export const courseService = {
             },
             async () => {
               try {
-                // Obtém o caminho e a URL da miniatura no Firebase Storage
                 const thumbnailRef = uploadThumbnail.snapshot.ref.fullPath
                 const thumbnailUrl = await getDownloadURL(
                   uploadThumbnail.snapshot.ref
@@ -172,7 +194,6 @@ export const courseService = {
         })
       }
 
-      // Adiciona o curso com os dados da miniatura
       const response = await addDoc(courseRef, {
         ...data,
         thumbnail: thumbnailData
@@ -208,7 +229,6 @@ export const courseService = {
           : (data.thumbnail as unknown as FileList)?.[0]
 
       if (thumbnail && thumbnail instanceof File) {
-        // Se houver uma nova miniatura, faça o upload
         const storageRef = ref(storage, `images/${thumbnail.name}`)
         const uploadThumbnail = uploadBytesResumable(storageRef, thumbnail)
 
@@ -226,7 +246,6 @@ export const courseService = {
             },
             async () => {
               try {
-                // Obtém o caminho e a URL da nova miniatura no Firebase Storage
                 const thumbnailRef = uploadThumbnail.snapshot.ref.fullPath
                 const thumbnailUrl = await getDownloadURL(
                   uploadThumbnail.snapshot.ref
@@ -235,7 +254,6 @@ export const courseService = {
                   url: thumbnailUrl,
                   ref: thumbnailRef
                 }
-                // Atualiza o curso com o novo caminho e URL da miniatura
                 await updateDoc(courseRef, {
                   ...data,
                   thumbnail: thumbnailData
@@ -263,67 +281,28 @@ export const courseService = {
   /**
    * Deleta um curso do Firestore e, se houver uma miniatura associada, remove-a do Firebase Storage.
    * @param {string} id - O ID do curso a ser deletado.
-   * @returns {Promise<string>} Uma Promise que resolve para o ID do curso deletado.
+   * @returns {Promise<void>} Uma Promise que resolve quando o curso for deletado.
    * @throws {Error} Se ocorrer um erro durante a exclusão do curso ou da miniatura.
    */
-  async deleteCourse(id: string): Promise<string> {
-    if (!id) {
-      throw new Error("ID do curso não fornecido") // Lança um erro se o ID não for fornecido
-    }
-
-    const courseRef = doc(db, "course", id)
-
+  async deleteCourse(id: string): Promise<void> {
     try {
+      const courseRef = doc(db, "course", id)
       const courseSnapshot = await getDoc(courseRef)
 
       if (!courseSnapshot.exists()) {
-        throw new Error("Curso não encontrado") // Lança um erro se o curso não for encontrado
+        throw new Error("Curso não encontrado")
       }
 
       const courseData = courseSnapshot.data() as Course
-      const thumbnailRef = courseData.thumbnail?.ref
 
-      await deleteDoc(courseRef) // Deleta o curso do Firestore
-
-      if (thumbnailRef) {
-        const storageRef = ref(storage, thumbnailRef)
-        await deleteObject(storageRef) // Deleta a miniatura do Firebase Storage, se existir
+      if (courseData.thumbnail?.ref) {
+        const imageRef = ref(storage, courseData.thumbnail.ref)
+        await deleteObject(imageRef)
       }
 
-      return id // Retorna o ID do curso deletado (resolvido como uma Promise)
+      await deleteDoc(courseRef)
     } catch (error) {
-      console.error("Erro ao deletar o curso:", error)
-      throw new Error(error instanceof Error ? error.message : String(error)) // Rejeita a Promise com um erro
-    }
-  },
-  /**
-   * Recupera uma lista de cursos com base nos IDs fornecidos.
-   * @param {string[]} courseIds - Os IDs dos cursos a serem recuperados.
-   * @returns {Promise<Course[]>} Uma Promise que resolve para uma lista de cursos.
-   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos.
-   */
-  async getCoursesByIds(courseIds: string[]): Promise<Course[]> {
-    try {
-      const coursesRef = collection(db, "course")
-      const coursesQuery = query(coursesRef, where("__name__", "in", courseIds))
-
-      const coursesSnapshot = await getDocs(coursesQuery)
-
-      const courses = await Promise.all(
-        coursesSnapshot.docs.map(async (doc) => {
-          const courseData = doc.data() as Course
-          courseData.id = doc.id
-
-          // Carrega as lições associadas ao curso, se necessário
-          const lessons = await getLessons(doc.id)
-          courseData.lessons = lessons
-
-          return courseData
-        })
-      )
-
-      return courses
-    } catch (error) {
+      console.error("Erro ao excluir curso:", error)
       throw new Error(error instanceof Error ? error.message : String(error))
     }
   }

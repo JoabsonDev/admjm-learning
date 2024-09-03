@@ -1,8 +1,8 @@
 import { useDebounce } from "@hooks/debounce"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
 import FilterShimmer from "@molecules/FilterShimmer"
-import Pagination from "@molecules/Pagination"
-import PaginationShimmer from "@molecules/PaginationShimmer"
+import FirebasePagination from "@molecules/FirebasePagination"
+import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import CourseCard from "@organisms/CourseCard"
 import Filter from "@organisms/Filter"
 import { courseService } from "@services/course"
@@ -11,38 +11,55 @@ import { useQuery } from "react-query"
 
 const { getCourses } = courseService
 
-export default function Home() {
-  // TODO: remover esses mocks ao integrar com firebase a lógica desses itens
-  // const continueCourses: Course = {
-  //   id: "bTuVJqVVfoprKX7Tj221",
-  //   title: "Complete Python Bootcamp: Go from zero to hero in Python 3",
-  //   description:
-  //     "Lorem ipsum dolor sit amet consectetur, adipisicing elit. Aliquam suscipit molestias, deserunt magni laudantium, corporis veniam rem ab cupiditate nobis sequi! Ratione, nisi. Veniam corrupti nesciunt namasperiores dolores magnam!",
-  //   // price: 25,
-  //   thumbnail: {
-  //     url: "https://gambolthemes.net/html-items/cursus-new-demo/images/courses/img-1.jpg",
-  //     ref: ""
-  //   },
-  //   rate: 4.5,
-  //   duration: "25 hours",
-  //   alreadyPurchased: true
-  // }
+const DEFAULT_PAGINATION = {
+  currentPage: 1,
+  pageLimit: 10,
+  total: 0,
+  lastVisible: null,
+  totalPages: 0,
+  pageStart: 0
+}
 
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    pageSize: 15,
-    total: 89
-  })
+export default function Home() {
+  const [pagination, setPagination] =
+    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
 
   const [filter, setFilter] = useState<FilterConfig>({
     order: null,
     value: ""
   })
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
 
-  const { data, isLoading, isFetching, refetch } = useQuery(
+  const isFiltering = filter.order || filter.value
+
+  const { pageLimit, lastVisible, pageStart } = pagination
+
+  const { data, isLoading, isFetching, refetch } = useQuery<Course[]>(
     ["courses"],
-    async () => {
-      const courses = await getCourses(filter.value, filter.order)
+    async (): Promise<Course[]> => {
+      const { courses, ...rest } = await getCourses(
+        filter.value,
+        filter.order,
+        pageLimit,
+        lastVisible
+      )
+
+      setPagination((prev) => ({
+        ...prev,
+        lastVisible: rest.pagination.lastVisible,
+        total: rest.pagination.total
+      }))
+
+      if (filteredCourses && isFiltering) {
+        setFilteredCourses([...filteredCourses, ...courses])
+        console.log("filteredCourses", [...filteredCourses, ...courses])
+        return data || []
+      }
+
+      if (data) {
+        return [...data, ...courses]
+      }
+
       return courses
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
@@ -91,24 +108,26 @@ export default function Home() {
             ? Array.from({ length: 4 }).map((_, index) => (
                 <CourseCardShimmer key={index} className="w-full max-w-full" />
               ))
-            : data?.map((course) => (
-                <CourseCard
-                  className="w-full max-w-full"
-                  key={course.id}
-                  data={course}
-                />
-              ))}
+            : (isFiltering ? filteredCourses : data)
+                ?.slice(pageStart, pageStart! + pageLimit)
+                .map((course) => (
+                  <CourseCard
+                    className="w-full max-w-full"
+                    key={course.id}
+                    data={course}
+                  />
+                ))}
         </div>
 
         {isLoading || isFetching ? (
-          <PaginationShimmer className="mt-10" />
+          <FirebasePaginationShimmer className="mt-10" />
         ) : (
-          <Pagination
+          <FirebasePagination
             className="mt-10"
-            data={pagination}
-            onPageChange={(page) =>
-              setPagination({ ...pagination, currentPage: page })
-            }
+            pagination={pagination}
+            onRefetch={refetch}
+            onPaginationChange={setPagination}
+            loadedDataLength={data?.length}
             setPaginationLabel={({ start, end, total }, setLabel) => {
               setLabel(`${start} - ${end} de ${total} cursos`)
             }}
