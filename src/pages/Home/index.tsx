@@ -7,7 +7,7 @@ import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import CourseCard from "@organisms/CourseCard"
 import Filter from "@organisms/Filter"
 import { courseService } from "@services/course"
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { useQuery } from "react-query"
 
 const { getCourses } = courseService
@@ -16,11 +16,15 @@ export default function Home() {
   const [pagination, setPagination] =
     useState<FirebasePaginationType>(DEFAULT_PAGINATION)
 
-  // TODO: fazer funcionar o filter
   const [filter, setFilter] = useState<FilterConfig>({
     order: null,
     value: ""
   })
+  const [lastFilter, setLastFilter] = useState<FilterConfig>({
+    order: null,
+    value: ""
+  })
+  const [filteredData, setFilteredData] = useState<Course[]>([])
 
   const debouncedQuery = useDebounce(filter.value, 300)
 
@@ -36,6 +40,21 @@ export default function Home() {
         lastVisible
       )
 
+      if (
+        (!debouncedQuery && !filter.order) ||
+        JSON.stringify(lastFilter) !== JSON.stringify(filter)
+      )
+        setFilteredData([])
+
+      if (debouncedQuery || filter.order) {
+        if (JSON.stringify(lastFilter) !== JSON.stringify(filter)) {
+          setLastFilter(filter)
+          setFilteredData(courses)
+        } else {
+          setFilteredData((prev) => [...prev, ...courses])
+        }
+      }
+
       setPagination((prev) => ({
         ...prev,
         lastVisible: rest.pagination.lastVisible,
@@ -50,17 +69,7 @@ export default function Home() {
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
   )
-
-  const isMounted = useRef(false)
-
-  useEffect(() => {
-    if (!isMounted.current) {
-      isMounted.current = true
-      return
-    }
-
-    refetch()
-  }, [debouncedQuery, filter.order])
+  console.log(filteredData)
 
   return (
     <div className="pt-8 px-4">
@@ -92,7 +101,7 @@ export default function Home() {
             ? Array.from({ length: 4 }).map((_, index) => (
                 <CourseCardShimmer key={index} className="w-full max-w-full" />
               ))
-            : data
+            : (filteredData.length > 0 ? filteredData : data)
                 ?.slice(pageStart, pageStart! + pageLimit)
                 .map((course) => (
                   <CourseCard
