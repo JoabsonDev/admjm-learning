@@ -69,7 +69,7 @@ export default function Lessons() {
         }
       }
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false, keepPreviousData: true }
   )
 
   // Mutation para deletar uma lição
@@ -227,7 +227,7 @@ export default function Lessons() {
                     onPaginationChange={setPagination}
                     loadedDataLength={data?.length}
                     setPaginationLabel={({ start, end, total }, setLabel) => {
-                      setLabel(`${start} - ${end} de ${total} cursos`)
+                      setLabel(`${start} - ${end} de ${total} módulos`)
                     }}
                   />
                 )}

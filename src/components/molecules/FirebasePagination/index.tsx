@@ -102,6 +102,8 @@ export default function FirebasePagination({
 
   setPaginationLabel?.({ start, end, total }, setLabel)
 
+  console.log(total, pageLimit)
+
   return (
     <div className={className} {...rest}>
       <div className="flex items-center justify-center gap-2">
@@ -122,7 +124,7 @@ export default function FirebasePagination({
         <button
           className={buttonArrowVariants({ size })}
           onClick={() => handleChangePage("next")}
-          disabled={currentPage === pagination.totalPages}
+          disabled={currentPage === pagination.totalPages || total < pageLimit}
           aria-label={`ir para a página ${currentPage + 1}`}
         >
           <FontAwesomeIcon

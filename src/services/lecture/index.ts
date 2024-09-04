@@ -4,20 +4,33 @@ import {
   collection,
   deleteDoc,
   doc,
+  DocumentSnapshot,
+  getCountFromServer,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
+  query,
+  startAfter,
   updateDoc
 } from "firebase/firestore"
 
 export const lectureService = {
   /**
-   * Recupera todas as palestras de uma lição específica em um curso.
+   * Recupera todas as palestras de uma lição específica em um curso, com paginação.
    * @param {string} courseId - O ID do curso ao qual a lição pertence.
    * @param {string} lessonId - O ID da lição cujas palestras devem ser recuperadas.
-   * @returns {Promise<Lecture[]>} Uma Promise que resolve para uma lista de palestras associadas à lição.
+   * @param {number} pageLimit - O número máximo de palestras a serem recuperadas por página.
+   * @param {DocumentSnapshot | null} lastVisible - A última palestra visível da página anterior para paginação.
+   * @returns {Promise<ResponseWithPagination<"lectures", Lecture>>} Uma Promise que resolve para uma lista de palestras paginada.
    * @throws {Error} Se ocorrer um erro durante a recuperação das palestras.
    */
-  async getLectures(courseId: string, lessonId: string): Promise<Lecture[]> {
+  async getLectures(
+    courseId: string,
+    lessonId: string,
+    pageLimit: number = 10,
+    lastVisible: DocumentSnapshot | null = null
+  ): Promise<ResponseWithPagination<"lectures", Lecture>> {
     try {
       const lecturesRef = collection(
         db,
@@ -27,12 +40,36 @@ export const lectureService = {
         lessonId,
         "lectures"
       )
-      const lecturesSnapshot = await getDocs(lecturesRef)
 
-      return lecturesSnapshot.docs.map((doc) => {
-        const data = doc.data() as Lecture
-        return { ...data, id: doc.id }
+      let lecturesQuery = query(lecturesRef, orderBy("title"), limit(pageLimit))
+
+      if (lastVisible) {
+        lecturesQuery = query(lecturesQuery, startAfter(lastVisible))
+      }
+
+      const lecturesSnapshot = await getDocs(lecturesQuery)
+      const newLastVisible =
+        lecturesSnapshot.docs[lecturesSnapshot.docs.length - 1]
+
+      const lectures = lecturesSnapshot.docs.map((doc) => {
+        const lectureData = doc.data() as Lecture
+        lectureData.id = doc.id // Adiciona o ID da palestra
+        return lectureData
       })
+
+      const snapshot = await getCountFromServer(lecturesRef)
+      const total = snapshot.data().count
+
+      const pagination = {
+        total,
+        lastVisible: newLastVisible,
+        pageLimit
+      }
+
+      return {
+        lectures,
+        pagination
+      }
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error))
     }

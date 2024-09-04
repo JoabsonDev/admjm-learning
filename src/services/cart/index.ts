@@ -101,6 +101,7 @@ export const cartService = {
   async getCartCourses(userId: string): Promise<Course[]> {
     try {
       const cart = await cartService.getCart(userId)
+
       if (!cart || cart.length === 0) return []
 
       return await getCoursesByIds(cart)

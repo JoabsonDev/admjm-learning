@@ -50,7 +50,7 @@ export const lessonService = {
         lessonsSnapshot.docs.map(async (doc) => {
           const lessonData = doc.data() as Lesson
           lessonData.id = doc.id // Adiciona o ID da lição
-          const lectures = await getLectures(courseId, doc.id)
+          const { lectures } = await getLectures(courseId, doc.id)
           lessonData.lectures = lectures
           lessonData.duration = calculateTotalDuration(
             lessonData.lectures
@@ -95,7 +95,7 @@ export const lessonService = {
 
       const lessonData = lessonSnapshot.data() as Lesson
       lessonData.id = lessonSnapshot.id // Adiciona o ID da lição
-      const lectures = await getLectures(courseId, lessonId)
+      const { lectures } = await getLectures(courseId, lessonId)
       lessonData.lectures = lectures
 
       return lessonData

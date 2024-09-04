@@ -3,9 +3,11 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Input from "@atoms/Input"
 import Shimmer from "@atoms/Shimmer"
 import YouTubeThumbnail from "@atoms/YouTubeThumbnail"
+import { DEFAULT_PAGINATION } from "@constants/default-pagination"
 import { getDurationYouTubeVideo } from "@helpers/get-duration-youtube-video"
 import { getYouTubeVideoId } from "@helpers/get-youtube-video-id"
-import Pagination from "@molecules/Pagination"
+import FirebasePagination from "@molecules/FirebasePagination"
+import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import PaginationShimmer from "@molecules/PaginationShimmer"
 import TableShimmer from "@molecules/TableShimmer"
 import Dialog from "@organisms/Dialog"
@@ -20,7 +22,8 @@ import { useMutation, useQuery } from "react-query"
 import { NavLink, useParams } from "react-router-dom"
 
 const { getLesson, updateLesson } = lessonService
-const { deleteLecture, createLecture, updateLecture } = lectureService
+const { deleteLecture, createLecture, updateLecture, getLectures } =
+  lectureService
 
 export default function Lesson() {
   const [lectureModal, setLectureModal] = useState<boolean>(false)
@@ -43,7 +46,7 @@ export default function Lesson() {
   } = useForm<Partial<Lecture>>({ mode: "onTouched" })
 
   const lessonQuery = useQuery(
-    ["lesson", courseId],
+    ["lesson", courseId, lessonId],
     async () => {
       if (courseId && lessonId) {
         try {
@@ -58,6 +61,45 @@ export default function Lesson() {
       }
     },
     { refetchOnWindowFocus: false }
+  )
+
+  const [pagination, setPagination] =
+    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
+
+  const { pageLimit, lastVisible, pageStart } = pagination
+
+  const lecturesQuery = useQuery(
+    ["lectures", courseId, lessonId],
+    async (): Promise<Lecture[] | undefined> => {
+      if (courseId && lessonId) {
+        try {
+          const { lectures, ...rest } = await getLectures(
+            courseId,
+            lessonId,
+            pageLimit,
+            lastVisible
+          )
+
+          setPagination((prev) => ({
+            ...prev,
+            lastVisible: rest.pagination.lastVisible,
+            total: rest.pagination.total
+          }))
+
+          if (lecturesQuery.data) {
+            return [...lecturesQuery.data, ...lectures]
+          }
+
+          return lectures
+        } catch {
+          addAlert(
+            "Erro ao carregar as aulas. Tente novamente mais tarde.",
+            "error"
+          )
+        }
+      }
+    },
+    { refetchOnWindowFocus: false, keepPreviousData: true }
   )
 
   const submitLessonForm = useMutation({
@@ -123,6 +165,12 @@ export default function Lesson() {
   const handleDeleteLecture = (id: string) => {
     deleteLectureMutation.mutate(id)
   }
+
+  const isLoading =
+    lessonQuery.isLoading ||
+    submitLessonForm.isLoading ||
+    lecturesQuery.isLoading
+  const { isFetching, refetch, data } = lecturesQuery
 
   return (
     <div className="pt-8 px-4">
@@ -218,7 +266,7 @@ export default function Lesson() {
             >
               Criar aula
             </Button>
-            {lessonQuery.data?.lectures.length === 0 ? (
+            {data?.length === 0 ? (
               <p className="text-center text-neutral-600 text-sm mt-8">
                 <FontAwesomeIcon icon="fa-solid fa-box-open" className="mr-2" />
                 Ainda não há nenhum dado para listar!
@@ -243,8 +291,9 @@ export default function Lesson() {
                     </Table.THead.TR>
                   </Table.THead>
                   <Table.TBody>
-                    {lessonQuery.data?.lectures.map(
-                      ({ id, title, video, duration }, index) => (
+                    {data
+                      ?.slice(pageStart, pageStart! + pageLimit)
+                      .map(({ id, title, video, duration }, index) => (
                         <Table.TBody.TR key={id}>
                           <Table.TBody.TR.TD className="text-left pl-2">
                             {index + 1}
@@ -293,15 +342,24 @@ export default function Lesson() {
                             </button>
                           </Table.TBody.TR.TD>
                         </Table.TBody.TR>
-                      )
-                    )}
+                      ))}
                   </Table.TBody>
                 </Table>
 
-                <Pagination
-                  className="mt-8"
-                  data={{ pageSize: 10, currentPage: 1, total: 23 }}
-                />
+                {isLoading || isFetching ? (
+                  <FirebasePaginationShimmer className="mt-10" />
+                ) : (
+                  <FirebasePagination
+                    className="mt-10"
+                    pagination={pagination}
+                    onRefetch={refetch}
+                    onPaginationChange={setPagination}
+                    loadedDataLength={data?.length}
+                    setPaginationLabel={({ start, end, total }, setLabel) => {
+                      setLabel(`${start} - ${end} de ${total} aulas`)
+                    }}
+                  />
+                )}
               </>
             )}
           </>
