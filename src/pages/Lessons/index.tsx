@@ -3,7 +3,9 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
 import Shimmer from "@atoms/Shimmer"
-import Pagination from "@molecules/Pagination"
+import { DEFAULT_PAGINATION } from "@constants/default-pagination"
+import FirebasePagination from "@molecules/FirebasePagination"
+import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import PaginationShimmer from "@molecules/PaginationShimmer"
 import TableShimmer from "@molecules/TableShimmer"
 import Dialog from "@organisms/Dialog"
@@ -28,16 +30,36 @@ export default function Lessons() {
   } = useForm<Partial<Lesson>>({ mode: "onTouched" })
   const [lessonModal, setLessonModal] = useState<boolean>(false)
 
+  const [pagination, setPagination] =
+    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
+
+  const { pageLimit, lastVisible, pageStart } = pagination
+
   const { setConfig } = usePrompt()
   const { addAlert } = useAlertStore()
 
   // Query para obter as lições
   const lessonsQuery = useQuery(
     ["lessons", courseId],
-    async () => {
+    async (): Promise<Lesson[] | undefined> => {
       if (courseId) {
         try {
-          const lessons = await getLessons(courseId)
+          const { lessons, ...rest } = await getLessons(
+            courseId,
+            pageLimit,
+            lastVisible
+          )
+
+          setPagination((prev) => ({
+            ...prev,
+            lastVisible: rest.pagination.lastVisible,
+            total: rest.pagination.total
+          }))
+
+          if (lessonsQuery.data) {
+            return [...lessonsQuery.data, ...lessons]
+          }
+
           return lessons
         } catch {
           addAlert(
@@ -85,6 +107,12 @@ export default function Lessons() {
   const submitForm = (data: Partial<Lesson>) => {
     createLessonMutation.mutate(data)
   }
+
+  const isLoading =
+    lessonsQuery.isLoading ||
+    createLessonMutation.isLoading ||
+    deleteLessonMutation.isLoading
+  const { isFetching, data, refetch } = lessonsQuery
 
   return (
     <div className="pt-8 px-4">
@@ -144,8 +172,9 @@ export default function Lessons() {
                     </Table.THead.TR>
                   </Table.THead>
                   <Table.TBody>
-                    {lessonsQuery.data?.map(
-                      ({ id, title, duration }, index) => (
+                    {lessonsQuery.data
+                      ?.slice(pageStart, pageStart! + pageLimit)
+                      .map(({ id, title, duration }, index) => (
                         <Table.TBody.TR key={id}>
                           <Table.TBody.TR.TD className="text-left pl-2">
                             {index + 1}
@@ -185,14 +214,23 @@ export default function Lessons() {
                             </button>
                           </Table.TBody.TR.TD>
                         </Table.TBody.TR>
-                      )
-                    )}
+                      ))}
                   </Table.TBody>
                 </Table>
-                <Pagination
-                  className="mt-8"
-                  data={{ pageSize: 10, currentPage: 1, total: 23 }}
-                />
+                {isLoading || isFetching ? (
+                  <FirebasePaginationShimmer className="mt-10" />
+                ) : (
+                  <FirebasePagination
+                    className="mt-10"
+                    pagination={pagination}
+                    onRefetch={refetch}
+                    onPaginationChange={setPagination}
+                    loadedDataLength={data?.length}
+                    setPaginationLabel={({ start, end, total }, setLabel) => {
+                      setLabel(`${start} - ${end} de ${total} cursos`)
+                    }}
+                  />
+                )}
               </>
             )}
           </>

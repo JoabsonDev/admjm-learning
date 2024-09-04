@@ -69,7 +69,6 @@ export default function Home() {
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
   )
-  console.log(filteredData)
 
   return (
     <div className="pt-8 px-4">

@@ -79,7 +79,7 @@ export const courseService = {
           const courseData = doc.data() as Course
           courseData.id = doc.id
 
-          const lessons = await getLessons(doc.id)
+          const { lessons } = await getLessons(doc.id)
           const duration = lessons.reduce((acc, { lectures }) => {
             acc = acc + calculateTotalDuration(lectures).total
             return acc
@@ -125,7 +125,7 @@ export const courseService = {
       }
 
       const courseData = courseSnapshot.data() as Course
-      const lessons = await getLessons(id)
+      const { lessons } = await getLessons(id)
       courseData.lessons = lessons
 
       return courseData

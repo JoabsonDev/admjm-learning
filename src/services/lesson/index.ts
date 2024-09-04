@@ -6,8 +6,13 @@ import {
   collection,
   deleteDoc,
   doc,
+  DocumentSnapshot,
+  getCountFromServer,
   getDoc,
   getDocs,
+  limit,
+  query,
+  startAfter,
   updateDoc
 } from "firebase/firestore"
 
@@ -15,16 +20,31 @@ const { getLectures } = lectureService
 
 export const lessonService = {
   /**
-   * Recupera todas as lições de um curso específico e carrega as palestras associadas a cada lição.
+   * Recupera as lições de um curso específico com paginação e carrega as palestras associadas a cada lição.
    * @param {string} courseId - O ID do curso cujas lições devem ser recuperadas.
-   * @returns {Promise<Lesson[]>} Uma Promise que resolve para uma lista de lições com suas palestras associadas.
+   * @param {number} pageLimit - O número máximo de lições a serem recuperadas por página.
+   * @param {DocumentSnapshot | null} lastVisible - A última lição visível da página anterior para paginação.
+   * @returns {Promise<ResponseWithPagination<"lessons", Lesson>>} Uma Promise que resolve para uma lista de lições paginada.
    * @throws {Error} Se ocorrer um erro durante a recuperação das lições ou das palestras.
    */
-  async getLessons(courseId: string): Promise<Lesson[]> {
+  async getLessons(
+    courseId: string,
+    pageLimit: number = 10,
+    lastVisible: DocumentSnapshot | null = null
+  ): Promise<ResponseWithPagination<"lessons", Lesson>> {
     try {
       const courseRef = doc(db, "course", courseId)
       const lessonsRef = collection(courseRef, "lessons")
-      const lessonsSnapshot = await getDocs(lessonsRef)
+
+      let lessonsQuery = query(lessonsRef, limit(pageLimit))
+
+      if (lastVisible) {
+        lessonsQuery = query(lessonsQuery, startAfter(lastVisible))
+      }
+
+      const lessonsSnapshot = await getDocs(lessonsQuery)
+      const newLastVisible =
+        lessonsSnapshot.docs[lessonsSnapshot.docs.length - 1]
 
       const lessons = await Promise.all(
         lessonsSnapshot.docs.map(async (doc) => {
@@ -39,7 +59,19 @@ export const lessonService = {
         })
       )
 
-      return lessons
+      const snapshot = await getCountFromServer(lessonsRef)
+      const total = snapshot.data().count
+
+      const pagination = {
+        total,
+        lastVisible: newLastVisible,
+        pageLimit
+      }
+
+      return {
+        lessons,
+        pagination
+      }
     } catch (error) {
       throw new Error(error instanceof Error ? error.message : String(error))
     }
