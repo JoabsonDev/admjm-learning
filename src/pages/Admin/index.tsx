@@ -1,14 +1,17 @@
 import Avatar from "@atoms/Avatar"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Shimmer from "@atoms/Shimmer"
+import { DEFAULT_PAGINATION } from "@constants/default-pagination"
 import { formateCurrency } from "@helpers/formate-currency"
-import Pagination from "@molecules/Pagination"
+import FirebasePagination from "@molecules/FirebasePagination"
+import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import PaginationShimmer from "@molecules/PaginationShimmer"
 import TableShimmer from "@molecules/TableShimmer"
 import Table from "@organisms/Table"
 import { courseService } from "@services/course"
 import { useAlertStore } from "@store/alert"
 import { usePrompt } from "@store/prompt"
+import { useState } from "react"
 import { useMutation, useQuery } from "react-query"
 import { NavLink } from "react-router-dom"
 
@@ -19,20 +22,33 @@ export default function Admin() {
   const { setConfig } = usePrompt()
   const { addAlert } = useAlertStore()
 
-  const getCoursesQuery = useQuery(
+  const [pagination, setPagination] =
+    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
+
+  const { pageLimit, lastVisible, pageStart } = pagination
+  const getCoursesQuery = useQuery<Course[]>(
     ["courses"],
-    async () => {
-      try {
-        const { courses } = await getCourses()
-        return courses
-      } catch {
-        addAlert(
-          "Erro ao carregar os cursos. Tente novamente mais tarde.",
-          "error"
-        )
+    async (): Promise<Course[]> => {
+      const { courses, ...rest } = await getCourses(
+        "",
+        null,
+        pageLimit,
+        lastVisible
+      )
+
+      setPagination((prev) => ({
+        ...prev,
+        lastVisible: rest.pagination.lastVisible,
+        total: rest.pagination.total
+      }))
+
+      if (getCoursesQuery.data) {
+        return [...getCoursesQuery.data, ...courses]
       }
+
+      return courses
     },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false, keepPreviousData: true }
   )
 
   const deleteCourseMutation = useMutation({
@@ -111,66 +127,79 @@ export default function Admin() {
                     </Table.THead.TR>
                   </Table.THead>
                   <Table.TBody>
-                    {getCoursesQuery.data?.map(
-                      ({ id, title, price, duration, thumbnail }, index) => (
-                        <Table.TBody.TR key={id}>
-                          <Table.TBody.TR.TD className="text-left pl-2">
-                            {index + 1}
-                          </Table.TBody.TR.TD>
-                          <Table.TBody.TR.TD
-                            className="flex items-center gap-2 text-left"
-                            main
-                          >
-                            <Avatar
-                              src={thumbnail?.url ?? thumbnail?.url}
-                              name={title}
-                            />
-                            {title}
-                          </Table.TBody.TR.TD>
+                    {getCoursesQuery.data
+                      ?.slice(pageStart, pageStart! + pageLimit)
+                      .map(
+                        ({ id, title, price, duration, thumbnail }, index) => (
+                          <Table.TBody.TR key={id}>
+                            <Table.TBody.TR.TD className="text-left pl-2">
+                              {index + 1}
+                            </Table.TBody.TR.TD>
+                            <Table.TBody.TR.TD
+                              className="flex items-center gap-2 text-left"
+                              main
+                            >
+                              <Avatar
+                                src={thumbnail?.url ?? thumbnail?.url}
+                                name={title}
+                              />
+                              {title}
+                            </Table.TBody.TR.TD>
 
-                          <Table.TBody.TR.TD className="text-center">
-                            {formateCurrency({ value: price! })}
-                          </Table.TBody.TR.TD>
-                          <Table.TBody.TR.TD className="text-center">
-                            {duration || "--"}
-                          </Table.TBody.TR.TD>
-                          <Table.TBody.TR.TD className="text-center w-10">
-                            <NavLink
-                              to={`/admin/course-manager/${id}`}
-                              className="block hover:-rotate-12 hover:-translate-y-1 transition-all duration-100"
-                            >
-                              <FontAwesomeIcon
-                                icon="fa-solid fa-pen-to-square"
-                                className="text-base"
-                              />
-                            </NavLink>
-                          </Table.TBody.TR.TD>
-                          <Table.TBody.TR.TD className="text-center w-10">
-                            <button
-                              className="text-red-500 hover:-rotate-12 hover:-translate-y-1 transition-all duration-200"
-                              onClick={() => {
-                                setConfig({
-                                  show: true,
-                                  callback: () =>
-                                    deleteCourseMutation.mutate(id)
-                                })
-                              }}
-                            >
-                              <FontAwesomeIcon
-                                icon="fa-solid fa-trash-can"
-                                className="text-base"
-                              />
-                            </button>
-                          </Table.TBody.TR.TD>
-                        </Table.TBody.TR>
-                      )
-                    )}
+                            <Table.TBody.TR.TD className="text-center">
+                              {formateCurrency({ value: price! })}
+                            </Table.TBody.TR.TD>
+                            <Table.TBody.TR.TD className="text-center">
+                              {duration || "--"}
+                            </Table.TBody.TR.TD>
+                            <Table.TBody.TR.TD className="text-center w-10">
+                              <NavLink
+                                to={`/admin/course-manager/${id}`}
+                                className="block hover:-rotate-12 hover:-translate-y-1 transition-all duration-100"
+                              >
+                                <FontAwesomeIcon
+                                  icon="fa-solid fa-pen-to-square"
+                                  className="text-base"
+                                />
+                              </NavLink>
+                            </Table.TBody.TR.TD>
+                            <Table.TBody.TR.TD className="text-center w-10">
+                              <button
+                                className="text-red-500 hover:-rotate-12 hover:-translate-y-1 transition-all duration-200"
+                                onClick={() => {
+                                  setConfig({
+                                    show: true,
+                                    callback: () =>
+                                      deleteCourseMutation.mutate(id)
+                                  })
+                                }}
+                              >
+                                <FontAwesomeIcon
+                                  icon="fa-solid fa-trash-can"
+                                  className="text-base"
+                                />
+                              </button>
+                            </Table.TBody.TR.TD>
+                          </Table.TBody.TR>
+                        )
+                      )}
                   </Table.TBody>
                 </Table>
-                <Pagination
-                  className="mt-8"
-                  data={{ pageSize: 10, currentPage: 1, total: 23 }}
-                />
+
+                {getCoursesQuery.isLoading || getCoursesQuery.isFetching ? (
+                  <FirebasePaginationShimmer className="mt-10" />
+                ) : (
+                  <FirebasePagination
+                    className="mt-10"
+                    pagination={pagination}
+                    onRefetch={getCoursesQuery.refetch}
+                    onPaginationChange={setPagination}
+                    loadedDataLength={getCoursesQuery.data?.length}
+                    setPaginationLabel={({ start, end, total }, setLabel) => {
+                      setLabel(`${start} - ${end} de ${total} cursos`)
+                    }}
+                  />
+                )}
               </>
             )}
           </>

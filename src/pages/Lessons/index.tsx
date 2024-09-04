@@ -96,7 +96,7 @@ export default function Lessons() {
 
         <NavLink
           to={`/admin/course-manager/${courseId}`}
-          className="flex items-center gap-1 text-neutral-600 hover:text-neutral-700 transition duration-200"
+          className="flex items-center gap-1 text-neutral-600 hover:text-neutral-700 hover:no-underline transition duration-200"
         >
           <FontAwesomeIcon icon="fa-solid fa-circle-left" />
           voltar

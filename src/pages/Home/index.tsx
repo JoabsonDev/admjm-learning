@@ -1,3 +1,4 @@
+import { DEFAULT_PAGINATION } from "@constants/default-pagination"
 import { useDebounce } from "@hooks/debounce"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
 import FilterShimmer from "@molecules/FilterShimmer"
@@ -11,31 +12,22 @@ import { useQuery } from "react-query"
 
 const { getCourses } = courseService
 
-const DEFAULT_PAGINATION = {
-  currentPage: 1,
-  pageLimit: 10,
-  total: 0,
-  lastVisible: null,
-  totalPages: 0,
-  pageStart: 0
-}
-
 export default function Home() {
   const [pagination, setPagination] =
     useState<FirebasePaginationType>(DEFAULT_PAGINATION)
 
+  // TODO: fazer funcionar o filter
   const [filter, setFilter] = useState<FilterConfig>({
     order: null,
     value: ""
   })
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([])
 
-  const isFiltering = filter.order || filter.value
+  const debouncedQuery = useDebounce(filter.value, 300)
 
   const { pageLimit, lastVisible, pageStart } = pagination
 
   const { data, isLoading, isFetching, refetch } = useQuery<Course[]>(
-    ["courses"],
+    ["courses", debouncedQuery, filter.order],
     async (): Promise<Course[]> => {
       const { courses, ...rest } = await getCourses(
         filter.value,
@@ -50,12 +42,6 @@ export default function Home() {
         total: rest.pagination.total
       }))
 
-      if (filteredCourses && isFiltering) {
-        setFilteredCourses([...filteredCourses, ...courses])
-        console.log("filteredCourses", [...filteredCourses, ...courses])
-        return data || []
-      }
-
       if (data) {
         return [...data, ...courses]
       }
@@ -66,8 +52,6 @@ export default function Home() {
   )
 
   const isMounted = useRef(false)
-
-  const debouncedQuery = useDebounce(filter.value, 300)
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -108,7 +92,7 @@ export default function Home() {
             ? Array.from({ length: 4 }).map((_, index) => (
                 <CourseCardShimmer key={index} className="w-full max-w-full" />
               ))
-            : (isFiltering ? filteredCourses : data)
+            : data
                 ?.slice(pageStart, pageStart! + pageLimit)
                 .map((course) => (
                   <CourseCard
