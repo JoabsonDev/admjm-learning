@@ -10,6 +10,9 @@ import useAuthStore from "@store/auth"
 import useCartStore from "@store/cart"
 import { useMutation, useQuery } from "react-query"
 
+// import { initMercadoPago } from '@mercadopago/sdk-react'
+// initMercadoPago('YOUR_PUBLIC_KEY');
+
 const { getCartCourses, removeItemFromCart } = cartService
 export default function Cart() {
   const { user } = useAuthStore()

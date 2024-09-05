@@ -44,8 +44,13 @@ export const useCourseStore = create<CourseStore>((set) => {
     if (currentIndex === -1)
       return { current: null, previous: null, next: null }
 
+    const lessonId =
+      course.lessons.find((lesson) =>
+        lesson.lectures.find((lecture) => lecture.id === lectureId)
+      )?.id || ""
+
     return {
-      current: lectures[currentIndex],
+      current: { ...lectures[currentIndex], lessonId },
       previous: lectures[currentIndex - 1] || null,
       next: lectures[currentIndex + 1] || null
     }

@@ -14,6 +14,7 @@ const Lessons = lazy(() => import("@pages/Lessons"))
 const SignIn = lazy(() => import("@pages/SignIn"))
 const SignUp = lazy(() => import("@pages/SignUp"))
 const Admin = lazy(() => import("@pages/Admin"))
+const MyCourses = lazy(() => import("@pages/MyCourses"))
 
 export default function Router() {
   return (
@@ -30,6 +31,7 @@ export default function Router() {
               <Route path="/" element={<Home />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/my-courses" element={<MyCourses />} />
               <Route path="/admin/course-manager" element={<CourseManager />} />
               <Route
                 path="/admin/course-manager/:courseId"

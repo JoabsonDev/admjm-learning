@@ -2,10 +2,15 @@ import Button from "@atoms/Button"
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Step from "@organisms/Step"
 import YouTubePlayer from "@organisms/YouTubePlayer"
+import { lectureService } from "@services/lecture"
 import { useCourseStore } from "@store/course"
+import { useYouTubeStore } from "@store/youtube"
 import { ComponentProps, useEffect, useState } from "react"
+import { useMutation } from "react-query"
 import { useParams } from "react-router-dom"
 import { tv, VariantProps } from "tailwind-variants"
+
+const { updateLecture } = lectureService
 
 const variants = tv({})
 type PlayerProps = ComponentProps<"div"> & VariantProps<typeof variants> & {}
@@ -22,11 +27,34 @@ export default function Player({ className, ...rest }: PlayerProps) {
       course
     })
   )
+
+  const { setPlayer } = useYouTubeStore()
+
   const { previous, next } = lecture
 
-  function handleFinish() {
-    console.log("finish")
-  }
+  const updateLectureMutation = useMutation({
+    mutationFn: () => {
+      if (courseId && lecture.current?.lessonId && lectureId) {
+        return updateLecture(courseId, lecture.current.lessonId, lectureId, {
+          ...lecture.current,
+          completed: true
+        })
+      }
+      throw new Error("Missing required parameters for updateLecture")
+    },
+    onSuccess: () => {
+      if (lecture.next?.id) {
+        setPlayer(null)
+        window.location.href = `/course/${courseId}/lecture/${lecture.next?.id}`
+      } else {
+        setPlayer(null)
+        window.location.reload()
+      }
+    },
+    onError: (error) => {
+      console.error("Erro ao atualizar a aula:", error)
+    }
+  })
 
   const [activeStep, setActiveStep] = useState<number>(1)
 
@@ -142,7 +170,7 @@ export default function Player({ className, ...rest }: PlayerProps) {
           {!!lecture.current?.video.ref && (
             <YouTubePlayer
               videoId={lecture.current.video.ref}
-              onFinish={handleFinish}
+              onFinish={() => updateLectureMutation.mutate()}
             />
           )}
 

@@ -5,6 +5,7 @@ type FileRef = {
 
 type Lecture = {
   id: string
+  lessonId?: string
   video: FileRef
   title: string
   duration: string

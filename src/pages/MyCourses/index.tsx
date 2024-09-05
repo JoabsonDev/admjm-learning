@@ -1,64 +1,26 @@
+import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import { DEFAULT_PAGINATION } from "@constants/default-pagination"
-import { useDebounce } from "@hooks/debounce"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
-import FilterShimmer from "@molecules/FilterShimmer"
 import FirebasePagination from "@molecules/FirebasePagination"
 import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import CourseCard from "@organisms/CourseCard"
-import Filter from "@organisms/Filter"
 import { courseService } from "@services/course"
 import useAuthStore from "@store/auth"
 import { useState } from "react"
 import { useQuery } from "react-query"
+import { NavLink } from "react-router-dom"
 
-const { getCoursesToHome } = courseService
+const { getCoursesFromUser } = courseService
 
-export default function Home() {
-  const [pagination, setPagination] =
-    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
+export default function MyCourses() {
   const { user } = useAuthStore()
 
-  const [filter, setFilter] = useState<FilterConfig>({
-    order: null,
-    value: ""
-  })
-  const [lastFilter, setLastFilter] = useState<FilterConfig>({
-    order: null,
-    value: ""
-  })
-  const [filteredData, setFilteredData] = useState<Course[]>([])
-
-  const debouncedQuery = useDebounce(filter.value, 300)
-
-  const { pageLimit, lastVisible, pageStart } = pagination
-
   const { data, isLoading, isFetching, refetch } = useQuery<Course[]>(
-    ["courses", debouncedQuery, filter.order],
+    ["my-courses"],
     async (): Promise<Course[]> => {
       if (!user?.uid) return []
 
-      const { courses, ...rest } = await getCoursesToHome(
-        user?.uid,
-        filter.value,
-        filter.order,
-        pageLimit,
-        lastVisible
-      )
-
-      if (
-        (!debouncedQuery && !filter.order) ||
-        JSON.stringify(lastFilter) !== JSON.stringify(filter)
-      )
-        setFilteredData([])
-
-      if (debouncedQuery || filter.order) {
-        if (JSON.stringify(lastFilter) !== JSON.stringify(filter)) {
-          setLastFilter(filter)
-          setFilteredData(courses)
-        } else {
-          setFilteredData((prev) => [...prev, ...courses])
-        }
-      }
+      const { courses, ...rest } = await getCoursesFromUser(user?.uid)
 
       setPagination((prev) => ({
         ...prev,
@@ -75,37 +37,38 @@ export default function Home() {
     { refetchOnWindowFocus: false, keepPreviousData: true }
   )
 
+  const [pagination, setPagination] =
+    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
+
+  const { pageLimit, pageStart } = pagination
+
   return (
     <div className="pt-8 px-4">
-      {/* <div className="mb-12">
-        <h2 className="mb-5 text-lg font-medium text-neutral-700">
-          Continuar estudando
-        </h2>
+      <div className="flex items-center justify-between">
+        <h1 className="flex items-center text-lg font-medium text-neutral-700">
+          <FontAwesomeIcon
+            icon="fa-solid fa-layer-group"
+            className="text-md w-6"
+          />{" "}
+          Meus cursos
+        </h1>
 
-        <CourseCard
-          className="mx-auto md:m-0 min-w-72 max-w-full md:max-w-[50%]"
-          data={continueCourses}
-        />
-      </div> */}
+        <NavLink
+          to={`/`}
+          className="flex items-center gap-1 text-neutral-600 hover:text-neutral-700 transition duration-200"
+        >
+          <FontAwesomeIcon icon="fa-solid fa-circle-left" />
+          voltar
+        </NavLink>
+      </div>
 
-      <div className="mb-12">
-        <div className="flex items-center justify-between gap-4 flex-wrap mb-8">
-          <h2 className="text-lg font-medium text-neutral-700">
-            Cursos em destaque
-          </h2>
-          {isLoading ? (
-            <FilterShimmer className="flex-1" />
-          ) : (
-            <Filter config={filter} onFilter={setFilter} className="flex-1" />
-          )}
-        </div>
-
+      <div className="my-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {isLoading || isFetching
             ? Array.from({ length: 4 }).map((_, index) => (
                 <CourseCardShimmer key={index} className="w-full max-w-full" />
               ))
-            : (filteredData.length > 0 ? filteredData : data)
+            : data
                 ?.slice(pageStart, pageStart! + pageLimit)
                 .map((course) => (
                   <CourseCard

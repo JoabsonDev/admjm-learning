@@ -22,16 +22,16 @@ export default function Admin() {
   const { setConfig } = usePrompt()
   const { addAlert } = useAlertStore()
 
+  const [courses, setCourses] = useState<Course[]>([])
+
   const [pagination, setPagination] =
     useState<FirebasePaginationType>(DEFAULT_PAGINATION)
 
   const { pageLimit, lastVisible, pageStart } = pagination
-  const getCoursesQuery = useQuery<Course[]>(
+  const getCoursesQuery = useQuery(
     ["courses"],
-    async (): Promise<Course[]> => {
-      const { courses, ...rest } = await getCourses(
-        "",
-        null,
+    async () => {
+      const { courses: newCourses, ...rest } = await getCourses(
         pageLimit,
         lastVisible
       )
@@ -42,11 +42,11 @@ export default function Admin() {
         total: rest.pagination.total
       }))
 
-      if (getCoursesQuery.data) {
-        return [...getCoursesQuery.data, ...courses]
+      if (courses) {
+        setCourses([...courses, ...newCourses])
+      } else {
+        setCourses(newCourses)
       }
-
-      return courses
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
   )
@@ -99,7 +99,7 @@ export default function Admin() {
             >
               Criar novo curso
             </NavLink>
-            {getCoursesQuery.data?.length === 0 ? (
+            {courses.length === 0 ? (
               <p className="text-center text-neutral-600 text-sm mt-8">
                 <FontAwesomeIcon icon="fa-solid fa-box-open" className="mr-2" />
                 Ainda não há nenhum dado para listar!
@@ -127,7 +127,7 @@ export default function Admin() {
                     </Table.THead.TR>
                   </Table.THead>
                   <Table.TBody>
-                    {getCoursesQuery.data
+                    {courses
                       ?.slice(pageStart, pageStart! + pageLimit)
                       .map(
                         ({ id, title, price, duration, thumbnail }, index) => (
@@ -194,7 +194,7 @@ export default function Admin() {
                     pagination={pagination}
                     onRefetch={getCoursesQuery.refetch}
                     onPaginationChange={setPagination}
-                    loadedDataLength={getCoursesQuery.data?.length}
+                    loadedDataLength={courses?.length}
                     setPaginationLabel={({ start, end, total }, setLabel) => {
                       setLabel(`${start} - ${end} de ${total} cursos`)
                     }}

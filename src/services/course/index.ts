@@ -29,15 +29,17 @@ const { getLessons } = lessonService
 
 export const courseService = {
   /**
-   * Recupera todos os cursos do Firestore com filtros opcionais, ordenação opcional e paginação.
-   * @param {string} titleFilter - Texto para filtrar o título do curso (semelhante ao SQL LIKE).
-   * @param {("asc" | "desc")} [order] - Define a ordenação pelo título como ascendente ou descendente. Se não for fornecido, não aplica ordenação.
-   * @param {number} pageLimit - Limite de cursos por página.
-   * @param {DocumentSnapshot | null} lastVisible - Documento a partir do qual iniciar a próxima página.
-   * @returns {Promise<ResponseWithPagination<"courses", Course>>} Uma Promise que resolve para uma lista de cursos paginada com suas lições associadas.
-   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos ou das lições.
+   * Recupera todos os cursos que o usuário ainda não comprou, com filtros opcionais de título, ordenação e paginação.
+   * @param {string} userId - O ID do usuário cujas compras serão verificadas.
+   * @param {string} [titleFilter=""] - Texto para filtrar o título do curso (semelhante ao SQL LIKE).
+   * @param {("asc" | "desc")} [order=null] - Define a ordenação pelo título como ascendente ou descendente. Se não for fornecido, não aplica ordenação.
+   * @param {number} [pageLimit=10] - Limite de cursos por página.
+   * @param {DocumentSnapshot | null} [lastVisible=null] - Documento a partir do qual iniciar a próxima página.
+   * @returns {Promise<ResponseWithPagination<"courses", Course>>} Uma Promise que resolve para uma lista de cursos não comprados com suas lições associadas.
+   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos ou das compras.
    */
-  async getCourses(
+  async getCoursesToHome(
+    userId: string,
     titleFilter: string = "",
     order: "asc" | "desc" | null = null,
     pageLimit: number = 10,
@@ -48,6 +50,7 @@ export const courseService = {
       const coursesQueryRef = query(coursesRef)
       let coursesQuery = query(coursesQueryRef)
 
+      // Filtrando por título se necessário
       if (titleFilter) {
         coursesQuery = query(
           coursesRef,
@@ -59,6 +62,220 @@ export const courseService = {
       if (order) {
         coursesQuery = query(coursesQuery, orderBy("title", order))
       }
+
+      if (lastVisible) {
+        coursesQuery = query(
+          coursesQuery,
+          startAfter(lastVisible),
+          limit(pageLimit)
+        )
+      } else {
+        coursesQuery = query(coursesQuery, limit(pageLimit))
+      }
+
+      // Recuperar as compras do usuário autenticado
+      const purchasesRef = collection(db, `users/${userId}/purchases`)
+      const purchasesSnapshot = await getDocs(purchasesRef)
+
+      // Extraindo os IDs dos cursos comprados
+      const purchasedCourseIds = new Set<string>()
+      const purchasedCoursePromises = purchasesSnapshot.docs.map(
+        async (purchaseDoc) => {
+          const itemsRef = collection(
+            db,
+            `users/${userId}/purchases/${purchaseDoc.id}/items`
+          )
+          const itemsSnapshot = await getDocs(itemsRef)
+          itemsSnapshot.docs.forEach((itemDoc) => {
+            const itemData = itemDoc.data()
+            purchasedCourseIds.add(itemData.courseId)
+          })
+        }
+      )
+      await Promise.all(purchasedCoursePromises)
+
+      // Agora, obtenha os cursos do Firestore
+      const coursesSnapshot = await getDocs(coursesQuery)
+      const newLastVisible =
+        coursesSnapshot.docs[coursesSnapshot.docs.length - 1]
+
+      // Filtrar apenas os cursos que ainda não foram comprados
+      const filteredCourses = coursesSnapshot.docs.filter(
+        (doc) => !purchasedCourseIds.has(doc.id)
+      ) // Filtra cursos não pagos
+
+      // Obter a contagem total de cursos não comprados
+      const totalCoursesSnapshot = await getDocs(coursesRef)
+      const totalCoursesCount = totalCoursesSnapshot.size
+      const totalPurchasedCount = purchasedCourseIds.size
+      const totalNotPurchasedCount = totalCoursesCount - totalPurchasedCount
+
+      // Mapear os cursos filtrados para o formato desejado
+      const courses = await Promise.all(
+        filteredCourses.map(async (doc) => {
+          const courseData = doc.data() as Course
+          courseData.id = doc.id
+
+          // Carregar lições associadas ao curso, se necessário
+          const { lessons } = await getLessons(doc.id)
+          const duration = lessons.reduce((acc, { lectures }) => {
+            acc = acc + calculateTotalDuration(lectures).total
+            return acc
+          }, 0)
+
+          courseData.duration = formatDuration(duration, "hh:mm:ss")
+
+          return courseData
+        })
+      )
+
+      const pagination = {
+        total: totalNotPurchasedCount,
+        lastVisible: newLastVisible,
+        pageLimit
+      }
+
+      return {
+        courses,
+        pagination
+      }
+    } catch (error) {
+      console.log("error:", error)
+
+      throw new Error(error instanceof Error ? error.message : String(error))
+    }
+  },
+  /**
+   * Recupera todos os cursos pagos de um usuário específico, com filtros opcionais de título, ordenação e paginação.
+   * @param {string} userId - O ID do usuário cujas compras serão verificadas.
+   * @param {string} [titleFilter=""] - Texto para filtrar o título do curso (semelhante ao SQL LIKE).
+   * @param {("asc" | "desc")} [order=null] - Define a ordenação pelo título como ascendente ou descendente. Se não for fornecido, não aplica ordenação.
+   * @param {number} [pageLimit=10] - Limite de cursos por página.
+   * @param {DocumentSnapshot | null} [lastVisible=null] - Documento a partir do qual iniciar a próxima página.
+   * @returns {Promise<ResponseWithPagination<"courses", Course>>} Uma Promise que resolve para uma lista de cursos pagos com suas lições associadas.
+   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos ou das compras.
+   */
+  async getCoursesFromUser(
+    userId: string,
+    titleFilter: string = "",
+    order: "asc" | "desc" | null = null,
+    pageLimit: number = 10,
+    lastVisible: DocumentSnapshot | null = null
+  ): Promise<ResponseWithPagination<"courses", Course>> {
+    try {
+      const coursesRef = collection(db, "course")
+      const coursesQueryRef = query(coursesRef)
+      let coursesQuery = query(coursesQueryRef)
+
+      // Filtrando por título se necessário
+      if (titleFilter) {
+        coursesQuery = query(
+          coursesRef,
+          where("title", ">=", titleFilter),
+          where("title", "<=", titleFilter + "\uf8ff")
+        )
+      }
+
+      if (order) {
+        coursesQuery = query(coursesQuery, orderBy("title", order))
+      }
+
+      if (lastVisible) {
+        coursesQuery = query(
+          coursesQuery,
+          startAfter(lastVisible),
+          limit(pageLimit)
+        )
+      } else {
+        coursesQuery = query(coursesQuery, limit(pageLimit))
+      }
+
+      // Recuperar as compras do usuário autenticado
+      const purchasesRef = collection(db, `users/${userId}/purchases`)
+      const purchasesSnapshot = await getDocs(purchasesRef)
+
+      // Extraindo os IDs dos cursos comprados
+      const purchasedCourseIds = new Set<string>()
+      const purchasedCoursePromises = purchasesSnapshot.docs.map(
+        async (purchaseDoc) => {
+          const itemsRef = collection(
+            db,
+            `users/${userId}/purchases/${purchaseDoc.id}/items`
+          )
+          const itemsSnapshot = await getDocs(itemsRef)
+          itemsSnapshot.docs.forEach((itemDoc) => {
+            const itemData = itemDoc.data()
+            purchasedCourseIds.add(itemData.courseId)
+          })
+        }
+      )
+      await Promise.all(purchasedCoursePromises)
+
+      // Filtrar apenas os cursos que foram comprados
+      const filteredCoursesQuery = query(
+        coursesRef,
+        where("__name__", "in", Array.from(purchasedCourseIds))
+      )
+      const filteredCoursesSnapshot = await getDocs(filteredCoursesQuery)
+      const totalPurchasedCount = filteredCoursesSnapshot.size
+
+      // Obter os cursos com a página atual
+      const coursesSnapshot = await getDocs(coursesQuery)
+      const newLastVisible =
+        coursesSnapshot.docs[coursesSnapshot.docs.length - 1]
+
+      const courses = await Promise.all(
+        coursesSnapshot.docs
+          .filter((doc) => purchasedCourseIds.has(doc.id)) // Filtra cursos pagos
+          .map(async (doc) => {
+            const courseData = doc.data() as Course
+            courseData.id = doc.id
+            courseData.alreadyPurchased = true
+
+            // Carregar lições associadas ao curso, se necessário
+            const { lessons } = await getLessons(doc.id)
+            const duration = lessons.reduce((acc, { lectures }) => {
+              acc = acc + calculateTotalDuration(lectures).total
+              return acc
+            }, 0)
+
+            courseData.duration = formatDuration(duration, "hh:mm:ss")
+
+            return courseData
+          })
+      )
+
+      const pagination = {
+        total: totalPurchasedCount,
+        lastVisible: newLastVisible,
+        pageLimit
+      }
+
+      return {
+        courses,
+        pagination
+      }
+    } catch (error) {
+      console.log("error:", error)
+
+      throw new Error(error instanceof Error ? error.message : String(error))
+    }
+  },
+  /**
+   * Recupera todos os cursos do Firestore com filtros opcionais, ordenação opcional e paginação.
+   * @param {number} pageLimit - Limite de cursos por página.
+   * @param {DocumentSnapshot | null} lastVisible - Documento a partir do qual iniciar a próxima página.
+   * @returns {Promise<ResponseWithPagination<"courses", Course>>} Uma Promise que resolve para uma lista de cursos paginada com suas lições associadas.
+   * @throws {Error} Se ocorrer um erro durante a recuperação dos cursos ou das lições.
+   */
+  async getCourses(
+    pageLimit: number = 10,
+    lastVisible: DocumentSnapshot | null = null
+  ): Promise<ResponseWithPagination<"courses", Course>> {
+    try {
+      const coursesRef = collection(db, "course")
+      const coursesQueryRef = query(coursesRef)
+      let coursesQuery = query(coursesQueryRef)
 
       if (lastVisible) {
         coursesQuery = query(

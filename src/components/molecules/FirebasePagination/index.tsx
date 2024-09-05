@@ -102,8 +102,6 @@ export default function FirebasePagination({
 
   setPaginationLabel?.({ start, end, total }, setLabel)
 
-  console.log(total, pageLimit)
-
   return (
     <div className={className} {...rest}>
       <div className="flex items-center justify-center gap-2">

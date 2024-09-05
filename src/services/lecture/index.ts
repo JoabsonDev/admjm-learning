@@ -162,6 +162,9 @@ export const lectureService = {
       throw new Error("O ID do curso, da lição e da palestra são obrigatórios")
     }
 
+    delete data.lessonId
+    delete data.id
+
     const lectureRef = doc(
       db,
       "course",
@@ -171,6 +174,7 @@ export const lectureService = {
       "lectures",
       lectureId
     )
+    console.log(lectureRef)
 
     try {
       await updateDoc(lectureRef, data)
