@@ -3,6 +3,7 @@ import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import Shimmer from "@atoms/Shimmer"
 import { DEFAULT_PAGINATION } from "@constants/default-pagination"
 import { formateCurrency } from "@helpers/formate-currency"
+import { removeDuplicates } from "@helpers/merge-and-remove-duplicates"
 import FirebasePagination from "@molecules/FirebasePagination"
 import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import PaginationShimmer from "@molecules/PaginationShimmer"
@@ -22,19 +23,14 @@ export default function Admin() {
   const { setConfig } = usePrompt()
   const { addAlert } = useAlertStore()
 
-  const [courses, setCourses] = useState<Course[]>([])
-
   const [pagination, setPagination] =
     useState<FirebasePaginationType>(DEFAULT_PAGINATION)
 
   const { pageLimit, lastVisible, pageStart } = pagination
-  const getCoursesQuery = useQuery(
+  const getCoursesQuery = useQuery<Course[]>(
     ["courses"],
-    async () => {
-      const { courses: newCourses, ...rest } = await getCourses(
-        pageLimit,
-        lastVisible
-      )
+    async (): Promise<Course[]> => {
+      const { courses, ...rest } = await getCourses(pageLimit, lastVisible)
 
       setPagination((prev) => ({
         ...prev,
@@ -42,11 +38,10 @@ export default function Admin() {
         total: rest.pagination.total
       }))
 
-      if (courses) {
-        setCourses([...courses, ...newCourses])
-      } else {
-        setCourses(newCourses)
-      }
+      if (getCoursesQuery.data)
+        return removeDuplicates([...getCoursesQuery.data, ...courses], "id")
+
+      return courses
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
   )
@@ -99,7 +94,7 @@ export default function Admin() {
             >
               Criar novo curso
             </NavLink>
-            {courses.length === 0 ? (
+            {getCoursesQuery.data?.length === 0 ? (
               <p className="text-center text-neutral-600 text-sm mt-8">
                 <FontAwesomeIcon icon="fa-solid fa-box-open" className="mr-2" />
                 Ainda não há nenhum dado para listar!
@@ -127,7 +122,7 @@ export default function Admin() {
                     </Table.THead.TR>
                   </Table.THead>
                   <Table.TBody>
-                    {courses
+                    {getCoursesQuery.data
                       ?.slice(pageStart, pageStart! + pageLimit)
                       .map(
                         ({ id, title, price, duration, thumbnail }, index) => (
@@ -194,7 +189,7 @@ export default function Admin() {
                     pagination={pagination}
                     onRefetch={getCoursesQuery.refetch}
                     onPaginationChange={setPagination}
-                    loadedDataLength={courses?.length}
+                    loadedDataLength={getCoursesQuery.data?.length}
                     setPaginationLabel={({ start, end, total }, setLabel) => {
                       setLabel(`${start} - ${end} de ${total} cursos`)
                     }}

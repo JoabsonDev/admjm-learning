@@ -30,22 +30,46 @@ export default function Sidebar({ className, ...rest }: SidebarProps) {
   const menuItems: SidebarItem[] = [
     {
       title: "Home",
-      icon: <FontAwesomeIcon icon="fa-solid fa-house text-lg w-6" />,
+      icon: (
+        <FontAwesomeIcon icon="fa-solid fa-house" className="text-lg w-6" />
+      ),
       to: "/"
     },
     {
       title: "Meus Cursos",
-      icon: <FontAwesomeIcon icon="fa-solid fa-photo-film text-sm w-6" />,
+      icon: (
+        <FontAwesomeIcon
+          icon="fa-solid fa-layer-group"
+          className="text-sm w-6"
+        />
+      ),
       to: "/my-courses"
     },
     {
+      title: "Favoritos",
+      icon: (
+        <FontAwesomeIcon icon="fa-solid fa-heart" className="text-md w-6" />
+      ),
+      to: "/favorites"
+    },
+    {
       title: "Certificados",
-      icon: <FontAwesomeIcon icon="fa-solid fa-graduation-cap text-md w-6" />,
+      icon: (
+        <FontAwesomeIcon
+          icon="fa-solid fa-graduation-cap"
+          className="text-md w-6"
+        />
+      ),
       to: "/certificates"
     },
     {
       title: "Admin",
-      icon: <FontAwesomeIcon icon="fa-solid fa-clapperboard text-md w-6" />,
+      icon: (
+        <FontAwesomeIcon
+          icon="fa-solid fa-clapperboard"
+          className="text-md w-6"
+        />
+      ),
       to: "/admin"
     },
     {
@@ -54,12 +78,14 @@ export default function Sidebar({ className, ...rest }: SidebarProps) {
     },
     {
       title: "Configurações",
-      icon: <FontAwesomeIcon icon="fa-solid fa-gear w-6" />,
+      icon: <FontAwesomeIcon icon="fa-solid fa-gear" className="w-6" />,
       to: "/settings"
     },
     {
       title: "Sair",
-      icon: <FontAwesomeIcon icon="fa-solid fa-power-off text-lg w-6" />,
+      icon: (
+        <FontAwesomeIcon icon="fa-solid fa-power-off" className="text-lg w-6" />
+      ),
       callback: async () => {
         await logout()
         addAlert("Você saiu da sua conta!", "success")

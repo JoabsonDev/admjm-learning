@@ -1,20 +1,23 @@
 import { lazy, Suspense } from "react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { PrivateRoutes } from "./private"
+
+const Admin = lazy(() => import("@pages/Admin"))
 const Auth = lazy(() => import("@pages/Auth"))
 const Cart = lazy(() => import("@pages/Cart"))
+const Certificates = lazy(() => import("@pages/Certificates"))
 const Course = lazy(() => import("@pages/Course"))
 const CourseDetails = lazy(() => import("@pages/CourseDetails"))
 const CourseManager = lazy(() => import("@pages/CourseManager"))
 const Dashboard = lazy(() => import("@pages/Dashboard"))
+const Favorites = lazy(() => import("@pages/Favorites"))
 const ForgotPassword = lazy(() => import("@pages/ForgotPassword"))
 const Home = lazy(() => import("@pages/Home"))
 const Lesson = lazy(() => import("@pages/Lesson"))
 const Lessons = lazy(() => import("@pages/Lessons"))
+const MyCourses = lazy(() => import("@pages/MyCourses"))
 const SignIn = lazy(() => import("@pages/SignIn"))
 const SignUp = lazy(() => import("@pages/SignUp"))
-const Admin = lazy(() => import("@pages/Admin"))
-const MyCourses = lazy(() => import("@pages/MyCourses"))
 
 export default function Router() {
   return (
@@ -32,6 +35,8 @@ export default function Router() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/my-courses" element={<MyCourses />} />
+              <Route path="/favorites" element={<Favorites />} />
+              <Route path="/certificates" element={<Certificates />} />
               <Route path="/admin/course-manager" element={<CourseManager />} />
               <Route
                 path="/admin/course-manager/:courseId"

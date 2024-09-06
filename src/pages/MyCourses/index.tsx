@@ -1,5 +1,6 @@
 import FontAwesomeIcon from "@atoms/FontAwesomeIcon"
 import { DEFAULT_PAGINATION } from "@constants/default-pagination"
+import { removeDuplicates } from "@helpers/merge-and-remove-duplicates"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
 import FirebasePagination from "@molecules/FirebasePagination"
 import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
@@ -15,6 +16,9 @@ const { getCoursesFromUser } = courseService
 export default function MyCourses() {
   const { user } = useAuthStore()
 
+  const [pagination, setPagination] =
+    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
+
   const { data, isLoading, isFetching, refetch } = useQuery<Course[]>(
     ["my-courses"],
     async (): Promise<Course[]> => {
@@ -29,16 +33,13 @@ export default function MyCourses() {
       }))
 
       if (data) {
-        return [...data, ...courses]
+        return removeDuplicates([...data, ...courses], "id")
       }
 
       return courses
     },
     { refetchOnWindowFocus: false, keepPreviousData: true }
   )
-
-  const [pagination, setPagination] =
-    useState<FirebasePaginationType>(DEFAULT_PAGINATION)
 
   const { pageLimit, pageStart } = pagination
 

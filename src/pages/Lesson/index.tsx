@@ -6,6 +6,7 @@ import YouTubeThumbnail from "@atoms/YouTubeThumbnail"
 import { DEFAULT_PAGINATION } from "@constants/default-pagination"
 import { getDurationYouTubeVideo } from "@helpers/get-duration-youtube-video"
 import { getYouTubeVideoId } from "@helpers/get-youtube-video-id"
+import { removeDuplicates } from "@helpers/merge-and-remove-duplicates"
 import FirebasePagination from "@molecules/FirebasePagination"
 import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import PaginationShimmer from "@molecules/PaginationShimmer"
@@ -87,7 +88,7 @@ export default function Lesson() {
           }))
 
           if (lecturesQuery.data) {
-            return [...lecturesQuery.data, ...lectures]
+            return removeDuplicates([...lecturesQuery.data, ...lectures], "id")
           }
 
           return lectures

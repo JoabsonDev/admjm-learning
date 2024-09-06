@@ -1,4 +1,5 @@
 import { DEFAULT_PAGINATION } from "@constants/default-pagination"
+import { removeDuplicates } from "@helpers/merge-and-remove-duplicates"
 import { useDebounce } from "@hooks/debounce"
 import CourseCardShimmer from "@molecules/CourseCardShimmer"
 import FilterShimmer from "@molecules/FilterShimmer"
@@ -56,7 +57,9 @@ export default function Home() {
           setLastFilter(filter)
           setFilteredData(courses)
         } else {
-          setFilteredData((prev) => [...prev, ...courses])
+          setFilteredData((prev) =>
+            removeDuplicates([...prev, ...courses], "id")
+          )
         }
       }
 
@@ -67,7 +70,7 @@ export default function Home() {
       }))
 
       if (data) {
-        return [...data, ...courses]
+        return removeDuplicates([...data, ...courses], "id")
       }
 
       return courses

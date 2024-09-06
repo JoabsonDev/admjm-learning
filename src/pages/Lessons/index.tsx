@@ -4,6 +4,7 @@ import Input from "@atoms/Input"
 import NavLink from "@atoms/NavLink"
 import Shimmer from "@atoms/Shimmer"
 import { DEFAULT_PAGINATION } from "@constants/default-pagination"
+import { removeDuplicates } from "@helpers/merge-and-remove-duplicates"
 import FirebasePagination from "@molecules/FirebasePagination"
 import FirebasePaginationShimmer from "@molecules/FirebasePaginationShimmer"
 import PaginationShimmer from "@molecules/PaginationShimmer"
@@ -57,7 +58,7 @@ export default function Lessons() {
           }))
 
           if (lessonsQuery.data) {
-            return [...lessonsQuery.data, ...lessons]
+            return removeDuplicates([...lessonsQuery.data, ...lessons], "id")
           }
 
           return lessons

@@ -122,7 +122,7 @@ export default function FirebasePagination({
         <button
           className={buttonArrowVariants({ size })}
           onClick={() => handleChangePage("next")}
-          disabled={currentPage === pagination.totalPages || total < pageLimit}
+          disabled={currentPage === pagination.totalPages || total <= pageLimit}
           aria-label={`ir para a página ${currentPage + 1}`}
         >
           <FontAwesomeIcon

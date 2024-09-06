@@ -2,8 +2,9 @@ import Button from "@atoms/Button"
 import Hr from "@atoms/Hr"
 import Input from "@atoms/Input"
 import { formateCurrency } from "@helpers/formate-currency"
+import axios from "axios"
 import { ComponentProps } from "react"
-import { useQueryClient } from "react-query"
+import { useMutation, useQueryClient } from "react-query"
 import { tv, VariantProps } from "tailwind-variants"
 
 const variants = tv({
@@ -27,6 +28,53 @@ export default function CartCardTotal({
   }, 0)
   // TODO: Implementar desconto
   const discount = 0
+
+  // TODO: consultar https://www.mercadopago.com.br/developers/pt/reference/preferences/_checkout_preferences/post para maiores detalhes
+  const createPreferenceMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axios.post(
+        "https://api.mercadopago.com/checkout/preferences",
+        {
+          items: cartCourses?.map((course) => ({
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            unit_price: course.price,
+            quantity: 1,
+            picture_url: course.thumbnail?.ref, // Supondo que exista um campo imageUrl no objeto course,
+            currency_id: "BRL"
+          })),
+          // TODO: Criar urls de retorno
+          back_urls: {
+            success: `${window.location.origin}?success`,
+            failure: `${window.location.origin}?failure`,
+            pending: `${window.location.origin}?pending`
+          },
+          auto_return: "approved",
+          payment_methods: {
+            installments: 1
+          },
+          // TODO: implementar o endpoint de notificação
+          notification_url: "https://www.notificacao.com.br"
+        },
+        {
+          headers: {
+            Authorization: `Bearer APP_USR-286691588459706-090520-d3ed793dfb3ea9b36c520365cb230f71-1978843226`,
+            "Content-Type": "application/json"
+          }
+        }
+      )
+      return response.data
+    },
+    onSuccess: (data) => {
+      // Redireciona o usuário para o URL de checkout retornado pelo Mercado Pago
+      window.location.href = data.init_point
+    },
+    onError: (error) => {
+      console.error("Erro ao criar preferência de pagamento:", error)
+      // Lógica para tratar o erro (exibir alerta, etc.)
+    }
+  })
 
   return (
     <div className={className} {...rest}>
@@ -92,7 +140,11 @@ export default function CartCardTotal({
             )} */}
         </div>
 
-        <Button color="danger" className="mt-10 w-full">
+        <Button
+          color="danger"
+          className="mt-10 w-full"
+          onClick={() => createPreferenceMutation.mutate()}
+        >
           Finalizar compra
         </Button>
       </div>
