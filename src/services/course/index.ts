@@ -12,7 +12,6 @@ import {
   getDoc,
   getDocs,
   limit,
-  orderBy,
   query,
   startAfter,
   updateDoc,
@@ -47,37 +46,18 @@ export const courseService = {
   ): Promise<ResponseWithPagination<"courses", Course>> {
     try {
       const coursesRef = collection(db, "course")
-      const coursesQueryRef = query(coursesRef)
-      let coursesQuery = query(coursesQueryRef)
 
-      // Filtrando por título se necessário
-      if (titleFilter) {
-        coursesQuery = query(
-          coursesRef,
-          where("title", ">=", titleFilter),
-          where("title", "<=", titleFilter + "\uf8ff")
-        )
-      }
+      // Recupera todos os cursos disponíveis
+      const coursesSnapshot = await getDocs(coursesRef)
+      const allCourses = coursesSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      })) as Course[]
 
-      if (order) {
-        coursesQuery = query(coursesQuery, orderBy("title", order))
-      }
-
-      if (lastVisible) {
-        coursesQuery = query(
-          coursesQuery,
-          startAfter(lastVisible),
-          limit(pageLimit)
-        )
-      } else {
-        coursesQuery = query(coursesQuery, limit(pageLimit))
-      }
-
-      // Recuperar as compras do usuário autenticado
+      // Recupera as compras do usuário
       const purchasesRef = collection(db, `users/${userId}/purchases`)
       const purchasesSnapshot = await getDocs(purchasesRef)
 
-      // Extraindo os IDs dos cursos comprados
       const purchasedCourseIds = new Set<string>()
       const purchasedCoursePromises = purchasesSnapshot.docs.map(
         async (purchaseDoc) => {
@@ -88,44 +68,61 @@ export const courseService = {
           const itemsSnapshot = await getDocs(itemsRef)
           itemsSnapshot.docs.forEach((itemDoc) => {
             const itemData = itemDoc.data()
-            purchasedCourseIds.add(itemData.courseId)
+            if (purchaseDoc.data().paymentStatus === "paid") {
+              purchasedCourseIds.add(itemData.courseId)
+            }
           })
         }
       )
       await Promise.all(purchasedCoursePromises)
 
-      // Agora, obtenha os cursos do Firestore
-      const coursesSnapshot = await getDocs(coursesQuery)
+      // Filtra os cursos que ainda não foram comprados
+      const availableCourses = allCourses.filter(
+        (course) => !purchasedCourseIds.has(course.id)
+      )
+
+      // Aplica a filtragem por título
+      const filteredCourses = titleFilter
+        ? availableCourses.filter((course) =>
+            course.title.toLowerCase().includes(titleFilter.toLowerCase())
+          )
+        : availableCourses
+
+      // Aplica a ordenação
+      const sortedCourses = order
+        ? filteredCourses.sort((a, b) =>
+            order === "asc"
+              ? a.title.localeCompare(b.title)
+              : b.title.localeCompare(a.title)
+          )
+        : filteredCourses
+
+      // Aplica a paginação
+      const startIndex = lastVisible
+        ? sortedCourses.findIndex((course) => course.id === lastVisible.id) + 1
+        : 0
+      const paginatedCourses = sortedCourses.slice(
+        startIndex,
+        startIndex + pageLimit
+      )
       const newLastVisible =
-        coursesSnapshot.docs[coursesSnapshot.docs.length - 1]
+        paginatedCourses[paginatedCourses.length - 1] || null
 
-      // Filtrar apenas os cursos que ainda não foram comprados
-      const filteredCourses = coursesSnapshot.docs.filter(
-        (doc) => !purchasedCourseIds.has(doc.id)
-      ) // Filtra cursos não pagos
+      // Calcula a contagem total de cursos não comprados
+      const totalNotPurchasedCount = filteredCourses.length
 
-      // Obter a contagem total de cursos não comprados
-      const totalCoursesSnapshot = await getDocs(coursesRef)
-      const totalCoursesCount = totalCoursesSnapshot.size
-      const totalPurchasedCount = purchasedCourseIds.size
-      const totalNotPurchasedCount = totalCoursesCount - totalPurchasedCount
-
-      // Mapear os cursos filtrados para o formato desejado
-      const courses = await Promise.all(
-        filteredCourses.map(async (doc) => {
-          const courseData = doc.data() as Course
-          courseData.id = doc.id
-
-          // Carregar lições associadas ao curso, se necessário
-          const { lessons } = await getLessons(doc.id)
+      // Obter os dados das lições associadas a cada curso
+      const coursesWithLessons = await Promise.all(
+        paginatedCourses.map(async (course) => {
+          const { lessons } = await getLessons(course.id)
           const duration = lessons.reduce((acc, { lectures }) => {
-            acc = acc + calculateTotalDuration(lectures).total
+            acc += calculateTotalDuration(lectures).total
             return acc
           }, 0)
-
-          courseData.duration = formatDuration(duration, "hh:mm:ss")
-
-          return courseData
+          return {
+            ...course,
+            duration: formatDuration(duration, "hh:mm:ss")
+          }
         })
       )
 
@@ -136,12 +133,11 @@ export const courseService = {
       }
 
       return {
-        courses,
+        courses: coursesWithLessons,
         pagination
       }
     } catch (error) {
-      console.log("error:", error)
-
+      console.error("Error:", error)
       throw new Error(error instanceof Error ? error.message : String(error))
     }
   },
@@ -163,34 +159,7 @@ export const courseService = {
     lastVisible: DocumentSnapshot | null = null
   ): Promise<ResponseWithPagination<"courses", Course>> {
     try {
-      const coursesRef = collection(db, "course")
-      const coursesQueryRef = query(coursesRef)
-      let coursesQuery = query(coursesQueryRef)
-
-      // Filtrando por título se necessário
-      if (titleFilter) {
-        coursesQuery = query(
-          coursesRef,
-          where("title", ">=", titleFilter),
-          where("title", "<=", titleFilter + "\uf8ff")
-        )
-      }
-
-      if (order) {
-        coursesQuery = query(coursesQuery, orderBy("title", order))
-      }
-
-      if (lastVisible) {
-        coursesQuery = query(
-          coursesQuery,
-          startAfter(lastVisible),
-          limit(pageLimit)
-        )
-      } else {
-        coursesQuery = query(coursesQuery, limit(pageLimit))
-      }
-
-      // Recuperar as compras do usuário autenticado
+      // Recupera as compras do usuário autenticado
       const purchasesRef = collection(db, `users/${userId}/purchases`)
       const purchasesSnapshot = await getDocs(purchasesRef)
 
@@ -205,44 +174,87 @@ export const courseService = {
           const itemsSnapshot = await getDocs(itemsRef)
           itemsSnapshot.docs.forEach((itemDoc) => {
             const itemData = itemDoc.data()
-            purchasedCourseIds.add(itemData.courseId)
+            if (
+              itemData.courseId &&
+              purchaseDoc.data().paymentStatus === "paid"
+            ) {
+              purchasedCourseIds.add(itemData.courseId)
+            }
           })
         }
       )
       await Promise.all(purchasedCoursePromises)
 
-      // Filtrar apenas os cursos que foram comprados
+      if (purchasedCourseIds.size === 0) {
+        // Se não há cursos comprados, retornar um resultado padrão
+        const pagination = {
+          total: 0,
+          lastVisible: null,
+          pageLimit
+        }
+
+        return {
+          courses: [],
+          pagination
+        }
+      }
+
+      // Recupera todos os cursos e filtra apenas os comprados
+      const coursesRef = collection(db, "course")
       const filteredCoursesQuery = query(
         coursesRef,
         where("__name__", "in", Array.from(purchasedCourseIds))
       )
       const filteredCoursesSnapshot = await getDocs(filteredCoursesQuery)
-      const totalPurchasedCount = filteredCoursesSnapshot.size
+      const allPurchasedCourses = filteredCoursesSnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id
+      })) as Course[]
 
-      // Obter os cursos com a página atual
-      const coursesSnapshot = await getDocs(coursesQuery)
+      // Aplica a filtragem por título
+      const filteredCourses = titleFilter
+        ? allPurchasedCourses.filter((course) =>
+            course.title.toLowerCase().includes(titleFilter.toLowerCase())
+          )
+        : allPurchasedCourses
+
+      // Aplica a ordenação
+      const sortedCourses = order
+        ? filteredCourses.sort((a, b) =>
+            order === "asc"
+              ? a.title.localeCompare(b.title)
+              : b.title.localeCompare(a.title)
+          )
+        : filteredCourses
+
+      // Aplica a paginação
+      const startIndex = lastVisible
+        ? sortedCourses.findIndex((course) => course.id === lastVisible.id) + 1
+        : 0
+      const paginatedCourses = sortedCourses.slice(
+        startIndex,
+        startIndex + pageLimit
+      )
       const newLastVisible =
-        coursesSnapshot.docs[coursesSnapshot.docs.length - 1]
+        paginatedCourses[paginatedCourses.length - 1] || null
 
-      const courses = await Promise.all(
-        coursesSnapshot.docs
-          .filter((doc) => purchasedCourseIds.has(doc.id)) // Filtra cursos pagos
-          .map(async (doc) => {
-            const courseData = doc.data() as Course
-            courseData.id = doc.id
-            courseData.alreadyPurchased = true
+      // Calcula a contagem total de cursos comprados
+      const totalPurchasedCount = filteredCourses.length
 
-            // Carregar lições associadas ao curso, se necessário
-            const { lessons } = await getLessons(doc.id)
-            const duration = lessons.reduce((acc, { lectures }) => {
-              acc = acc + calculateTotalDuration(lectures).total
-              return acc
-            }, 0)
-
-            courseData.duration = formatDuration(duration, "hh:mm:ss")
-
-            return courseData
-          })
+      // Obter os dados das lições associadas a cada curso
+      const coursesWithLessons = await Promise.all(
+        paginatedCourses.map(async (course) => {
+          const { lessons } = await getLessons(course.id)
+          const duration = lessons.reduce((acc, { lectures }) => {
+            acc += calculateTotalDuration(lectures).total
+            return acc
+          }, 0)
+          return {
+            ...course,
+            duration: formatDuration(duration, "hh:mm:ss"),
+            alreadyPurchased: true
+          }
+        })
       )
 
       const pagination = {
@@ -252,12 +264,11 @@ export const courseService = {
       }
 
       return {
-        courses,
+        courses: coursesWithLessons,
         pagination
       }
     } catch (error) {
-      console.log("error:", error)
-
+      console.error("Error:", error)
       throw new Error(error instanceof Error ? error.message : String(error))
     }
   },
