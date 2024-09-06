@@ -18,7 +18,7 @@ export default function Cart() {
 
   const { data, refetch, isLoading } = useQuery(
     ["cart-courses"],
-    async () => {
+    async (): Promise<Course[]> => {
       try {
         if (user?.uid) {
           const courses = await getCartCourses(user.uid)
